@@ -1,5 +1,7 @@
 from django.db import models
 
+#ddd
+
 class Cliente(models.Model):
     rutCliente = models.IntegerField(primary_key=True) #este campo rutCliente necesito que sea clave primaria de la tabla Cliente
     dvRutCliente = models.CharField(max_length=1)
