@@ -23,7 +23,7 @@
         <span class="fw-bold">
             ¿Estás seguro de eliminar el contacto
             <br>
-            {{ cliente.nombreCliente }} {{ cliente.apPaternoCliente }} {{cliente.apMaternoCliente }}?
+            {{ cliente.nombreCliente }} {{ cliente.apPaternoCliente }} {{cliente.apMaternoCliente |default:'' }}?
         </span>
         <form method="post" class="mt-3">
             {% csrf_token %}

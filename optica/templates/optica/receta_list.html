@@ -12,12 +12,12 @@
             <div class="row">
                 <div class="col-lg-9 col-md-8">
                     <h1 class="font-weight-bold mb-0">Recetas</h1>
-                    <p class="lead text-muted">Revisa la última información</p>
+                    <p class="lead text-muted">Listado de recetas registradas en sistema</p>
                 </div>
                 <div class="col-lg-3 col-md-4 d-flex">
 
                     <a href="{% url 'receta_new' %}" class="btn btn-primary w-100 align-self-center">
-                        Ingresar Receta</a>
+                        Ingresar nueva Receta</a>
                 </div>
             </div>
         </div>
@@ -30,13 +30,13 @@
             <div class="card border border-1 shadow rounded p-3 ">
 
                 <!-- Buscar por -->
-                <form action="" style="max-width: 450px;">
+                <form action="" style="max-width: 550px;">
                     <div class="input-group">
                         <input type="text" class="form-control"
                             placeholder="Buscar por Nombre, Apellido o RUN (Sin guión)" name="q"
                             value="{{ request.GET.q }}">
                         <button class="btn btn-primary">
-                            Buscar
+                            Buscar Receta
                         </button>
                     </div>
                 </form>
@@ -50,7 +50,9 @@
 
                         <thead>
                             <tr>
-                                <th scope="col">RUN Cliente</th>
+                                <th scope="col">Id</th>
+                                <th scope="col">RUN</th>
+                                <th scope="col">Nombre</th>
                                 <th scope="col">Numero de Receta</th>
                                 <th scope="col">Fecha Receta</th>
                                 <th scope="col">Lejos OD</th>
@@ -69,7 +71,11 @@
                         <tbody>
                             {% for receta in object_list %}
                             <tr>
-                                <td> {{receta.rutCliente}}-{{cliente.dvRutCliente}}</td>
+                                <td>{{ receta.idReceta |default:'-' }}</td>
+                                <td> {{receta.rutCliente}}-{{receta.dvRutCliente}}</td>
+                                <td class="text-uppercase"> {{ receta.nombreCliente }} {{ receta.apPaternoCliente }}
+                                    {{ receta.apMaternoCliente |default:'-' }}</td>
+
                                 <td>{{ receta.numeroReceta |default:'-' }}</td>
                                 <td>{{ receta.fechaReceta |default:'-' }}</td>
                                 <td>{{ receta.lejosOd |default:'-' }}</td>

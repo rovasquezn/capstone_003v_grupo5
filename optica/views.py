@@ -160,6 +160,18 @@ class CrearRecetaView(generic.CreateView):
     'doctorOftalmologo',
     'observacionReceta')
     success_url = reverse_lazy('receta_list')
+    
+    # def __init__(self, *args, **kwargs):
+    #     super(RecetaForm, self).__init__(*args, **kwargs)
+        
+    #     # Bloquear los campos para que sean solo lectura
+    #     self.fields['rutCliente'].widget.attrs['readonly'] = True
+    #     self.fields['dvRutCliente'].widget.attrs['readonly'] = True
+    #     self.fields['nombreCliente'].widget.attrs['readonly'] = True
+    #     self.fields['apPaternoCliente'].widget.attrs['readonly'] = True
+    #     self.fields['apMaternoCliente'].widget.attrs['readonly'] = True
+    #     self.fields['celularCliente'].widget.attrs['readonly'] = True
+    #     self.fields['telefonoCliente'].widget.attrs['readonly'] = True
         
 
 

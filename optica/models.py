@@ -67,11 +67,10 @@ class Receta(models.Model):
     doctorOftalmologo = models.CharField(max_length=40, null=True, blank=True, verbose_name="Tecnologo Oftalmologia")
     linkFotoReceta = models.CharField(max_length=200, null=True, blank=True)
     observacionReceta = models.CharField(max_length=300, null=True, blank=True, verbose_name="Observaciones")
-    
-    
 
     def __str__(self):
-        return f"{self.numeroReceta}"
+        return f"{self.idReceta}"
+    
     
 class Abono(models.Model): 
     idAbono = models.AutoField(primary_key=True, default=1)

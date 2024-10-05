@@ -12,7 +12,7 @@
             <div class="row">
                 <div class="col-lg-9 col-md-8">
                     <h1 class="font-weight-bold mb-0">Clientes</h1>
-                    <p class="lead text-muted">Revisa la última información</p>
+                    <p class="lead text-muted">Listado de clientes registrados en sistema</p>
                 </div>
                 <div class="col-lg-3 col-md-4 d-flex">
 
@@ -68,13 +68,13 @@
             <div class="card border border-1 shadow rounded p-3 ">
 
                 <!-- Buscar por -->
-                <form action="" style="max-width: 450px;">
+                <form action="" style="max-width: 550px;">
                     <div class="input-group">
                         <input type="text" class="form-control"
                             placeholder="Buscar por Nombre, Apellido o RUN (Sin guión)" name="q"
                             value="{{ request.GET.q }}">
                         <button class="btn btn-primary">
-                            Buscar
+                            Buscar Cliente
                         </button>
                     </div>
                 </form>
@@ -88,8 +88,6 @@
                             <tr>
                                 <th scope="col">RUN</th>
                                 <th scope="col">Nombre</th>
-                                <th scope="col">Primer Apellido</th>
-                                <th scope="col">Segundo Apellido</th>
                                 <th scope="col">Celular</th>
                                 <th scope="col">Telefono</th>
                                 <th scope="col">Email</th>
@@ -101,10 +99,8 @@
                             {% for cliente in object_list %}
                             <tr>
                                 <td> {{cliente.rutCliente}}-{{cliente.dvRutCliente}}</td>
-                                <td class="text-uppercase"> {{ cliente.nombreCliente }}</td>
-                                <td class="text-uppercase"> {{ cliente.apPaternoCliente }}</td>
-                                <td class="text-uppercase"> {{ cliente.apMaternoCliente |default:'-' }}
-                                </td>
+                                <td class="text-uppercase"> {{ cliente.nombreCliente }} {{ cliente.apPaternoCliente }}
+                                    {{ cliente.apMaternoCliente |default:'-' }}</td>
                                 <td>{{ cliente.celularCliente |default:'-' }}</td>
                                 <td>{{ cliente.telefonoCliente |default:'-' }}</td>
                                 <td class="text-uppercase"> {{ cliente.emailCliente |default:'-' }}
