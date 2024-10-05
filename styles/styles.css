@@ -1,0 +1,83 @@
+:root {
+    --primary: #049ccc;
+    --light: #ffffff;
+    --grey: #efefef03;
+}
+
+body {
+    overflow: hidden;
+    font-family: 'Muli', sans-serif;
+    font-weight: 300;
+    color: var(--primary);
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+.bg-primary { background-color: var(--primary) !important; }
+
+.bg-light { background-color: var(--light) !important; }
+
+.bg-grey { background-color: var(--grey) !important; }
+
+.bg-mix { background: linear-gradient(180deg, var(--light) 100%, var(--grey) 0); }
+
+.btn-primary {
+    background-color: var(--primary);
+    border: 0;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary);
+}
+
+#sidebar-container {
+    min-height: 100vh;
+}
+  
+#sidebar-container .logo{
+    padding: 3rem 1rem;
+
+}
+  
+#sidebar-container .menu {
+    width: 16rem;
+    padding: 1rem;
+
+    font-weight: bold;
+}
+
+#content {
+    overflow-y: auto;
+    height: 100vh;
+    padding-bottom: 4rem;
+}
+
+.avatar {
+    max-width: 35px;
+}
+
+.btn-search {
+    right: 0;
+}
+
+.stat {
+    border-right: 1px solid var(--grey);
+}
+
+  
+@media (max-width: 768px) {
+    #sidebar-container {
+      display: none;
+    }
+    .stat {
+        border: 0;
+    }
+  }
+  
+
+  .scrollable-form {
+    max-height: 400px; /* Ajusta este valor según el tamaño que necesites */
+    overflow-y: auto;
+}

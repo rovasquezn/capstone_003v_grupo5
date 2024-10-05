@@ -1,19 +1,19 @@
 from django.db import models
 
 class Cliente(models.Model):
-    rutCliente = models.IntegerField(primary_key=True) #este campo rutCliente necesito que sea clave primaria de la tabla Cliente
-    dvRutCliente = models.CharField(max_length=1)
-    nombreCliente = models.CharField(max_length=20)
-    apPaternoCliente = models.CharField(max_length=20)
-    apMaternoCliente = models.CharField(max_length=20, null=True, blank=True)
-    celularCliente = models.IntegerField(null=True, blank=True)
-    telefonoCliente = models.IntegerField(null=True, blank=True)
-    emailCliente = models.EmailField(max_length=50, null=True, blank=True)  
-    direccionCliente = models.CharField(max_length=100, null=True, blank=True)
+    rutCliente = models.IntegerField(primary_key=True, verbose_name="RUN") #este campo rutCliente necesito que sea clave primaria de la tabla Cliente
+    dvRutCliente = models.CharField(max_length=1, verbose_name="Digito Verificador")
+    nombreCliente = models.CharField(max_length=20, verbose_name="Nombre")
+    apPaternoCliente = models.CharField(max_length=20, verbose_name="Apellido Paterno")
+    apMaternoCliente = models.CharField(max_length=20, null=True, blank=True, verbose_name="Apellido Materno")
+    celularCliente = models.IntegerField(null=True, blank=True, verbose_name="Celular")
+    telefonoCliente = models.IntegerField(null=True, blank=True, verbose_name="Teléfono")
+    emailCliente = models.EmailField(max_length=50, null=True, blank=True, verbose_name="Correo Electrónico")
+    direccionCliente = models.CharField(max_length=100, null=True, blank=True, verbose_name="Dirección")
     creacionCliente = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.nombreCliente} {self.apPaternoCliente} {self.apMaternoCliente} {self.rutCliente}"
+        return f"{self.rutCliente}"
 
 class Atendedor(models.Model): 
     rutAtendedor = models.IntegerField(primary_key=True) #este campo rutAtendedor necesito que sea clave primaria de la tabla Atendedor
@@ -47,22 +47,31 @@ class Tecnico(models.Model):
 class Receta(models.Model):
     idReceta = models.BigAutoField(primary_key=True)
     rutCliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)#este campo rutCliente necesito que en mi tabla Receta sea clave foranea del campo rutCliente de tabla Cliente
-    numeroReceta = models.IntegerField(null=True, blank=True)
-    fechaReceta = models.DateField(null=True, blank=True) 
+    dvRutCliente = models.CharField(max_length=1, null=True, blank=True, verbose_name="Digito Verificador")
+    nombreCliente = models.CharField(max_length=20, null=True, blank=True, verbose_name="Nombre")
+    apPaternoCliente = models.CharField(max_length=20, null=True, blank=True, verbose_name="Apellido Paterno")
+    apMaternoCliente = models.CharField(max_length=20, null=True, blank=True, verbose_name="Apellido Materno")
+    celularCliente = models.IntegerField(null=True, blank=True, verbose_name="Celular")
+    telefonoCliente = models.IntegerField(null=True, blank=True, verbose_name="Teléfono")
+    numeroReceta = models.IntegerField(null=True, blank=True, verbose_name="Numero de Receta")
+    fechaReceta = models.DateField(null=True, blank=True, verbose_name="Fecha Receta") 
     creacionReceta = models.DateTimeField(auto_now_add=True)
-    lejosOd = models.CharField(max_length=10, null=True, blank=True)
-    lejosOi = models.CharField(max_length=10, null=True, blank=True)
-    cercaOd = models.CharField(max_length=10, null=True, blank=True)
-    cercaOi = models.CharField(max_length=10, null=True, blank=True)
-    dpCerca = models.CharField(max_length=10, null=True, blank=True)
-    dpLejos = models.CharField(max_length=10, null=True, blank=True)
-    tipoLente = models.CharField(max_length=20, null=True, blank=True)
-    institucion = models.CharField(max_length=20, null=True, blank=True)
-    doctorOftalmologo = models.CharField(max_length=40, null=True, blank=True)
+    lejosOd = models.CharField(max_length=10, null=True, blank=True, verbose_name="Lejos OD")
+    lejosOi = models.CharField(max_length=10, null=True, blank=True, verbose_name="Lejos OI")
+    cercaOd = models.CharField(max_length=10, null=True, blank=True, verbose_name="Cerca OD")
+    cercaOi = models.CharField(max_length=10, null=True, blank=True, verbose_name="Cerca OI")
+    dpCerca = models.CharField(max_length=10, null=True, blank=True, verbose_name="DP Cerca")
+    dpLejos = models.CharField(max_length=10, null=True, blank=True, verbose_name="DP Lejos")
+    tipoLente = models.CharField(max_length=20, null=True, blank=True, verbose_name="Tipo de Lente")
+    institucion = models.CharField(max_length=20, null=True, blank=True, verbose_name="Institucion")
+    doctorOftalmologo = models.CharField(max_length=40, null=True, blank=True, verbose_name="Tecnologo Oftalmologia")
     linkFotoReceta = models.CharField(max_length=200, null=True, blank=True)
+    observacionReceta = models.CharField(max_length=300, null=True, blank=True, verbose_name="Observaciones")
+    
+    
 
     def __str__(self):
-        return f"{self.creacionReceta}"
+        return f"{self.numeroReceta}"
     
 class Abono(models.Model): 
     idAbono = models.AutoField(primary_key=True, default=1)
@@ -72,6 +81,7 @@ class Abono(models.Model):
     formaPagoAbono = models.CharField(max_length=10, null=True, blank=True)
     numeroVoucherAbono = models.IntegerField(null=True, blank=True)
     numeroAbono = models.IntegerField(null=True, blank=True)
+    
 
     def __str__(self):
         return f"{self.fechaAbono} {self.valorAbono}"
@@ -109,6 +119,8 @@ class OrdenTrabajo(models.Model):
     tipoCristalCerca = models.CharField(max_length=25, null=True, blank=True)
     colorCerca = models.CharField(max_length=20, null=True, blank=True)
     numeroVoucherOrdenTrabajo = models.IntegerField(null=True, blank=True)
+    observacionOrdenTrabajo = models.CharField(max_length=300, null=True, blank=True)
+
 
     def __str__(self):
         return f"{self.rutCliente} {self.fechaOrdenTrabajo} {self.valorOrdenTrabajo}"

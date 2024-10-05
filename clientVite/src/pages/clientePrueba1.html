@@ -1,0 +1,122 @@
+{% extends '../src/components/sideBarMenu.html' %}
+{% load static %}
+
+{% block content %}
+
+
+
+<!-- <div class="w-100">
+
+    Navbar
+   <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+     <div class="container">
+
+       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" //
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+         <span class="navbar-toggler-icon"></span>
+         </button>
+
+       <div class="collapse navbar-collapse" id="navbarSupportedContent"> -->
+
+
+<!--   aqui puede ir
+//                               <form class="form-inline position-relative d-inline-block my-2">
+//                   <input class="form-control" type="search" placeholder="Buscar" aria-label="Buscar">
+//                   <button class="btn position-absolute btn-search" type="submit"><i class="icon ion-md-search"></i></button>
+//                 </form>
+//  -->
+
+<!-- // <ul class="navbar-nav ml-auto mt-2 mt-lg-0"> -->
+// <li class="nav-item dropdown">
+  // <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" // data-toggle="dropdown"
+    aria-haspopup="true" aria-expanded="false">
+    // <img src="assets/img/user-1.png" class="img-fluid rounded-circle avatar mr-2" //
+      alt="https://generated.photos/" />
+    // Bienvenido, Rodrigo Vasquez
+    // </a>
+  // <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+    // <a class="dropdown-item" href="#">Mi perfil</a>
+
+    // <div class="dropdown-divider"></div>
+    // <a class="dropdown-item" href="#">Cerrar sesión</a>
+    // </div>
+  // </li>
+// </ul>
+
+
+
+// </div>
+// </div>
+// </nav>
+// <!-- Fin Navbar -->
+
+// <!-- Page Content -->
+<div id="content" class="bg-grey w-100">
+
+  <section class="bg-light py-3">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-9 col-md-8">
+          <h1 class="font-weight-bold mb-0">Clientes</h1>
+          <p class="lead text-muted">Revisa la última información</p>
+        </div>
+        <div class="col-lg-3 col-md-4 d-flex">
+          <button class="btn btn-primary w-100 align-self-center">Ingresar Nuevo Cliente</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <div class="mt-">
+    <div class="container w-100">
+      <div class="card border rounded p-3">
+        <table class="table table-striped mb-0">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">First</th>
+              <th scope="col">Last</th>
+              <th scope="col">Handle</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">1</th>
+              <td>Mark</td>
+              <td>Otto</td>
+              <td>@mdo</td>
+            </tr>
+            <tr>
+              <th scope="row">2</th>
+              <td>Jacob</td>
+              <td>Thornton</td>
+              <td>@fat</td>
+            </tr>
+            <tr>
+              <th scope="row">3</th>
+              <td colspan="2">Larry the Bird</td>
+              <td>@twitter</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <nav aria-label="Page navigation example" class="mt1">
+        <ul class="pagination justify-content-center">
+          <li class="page-item disabled">
+            <a class="page-link">Previous</a>
+          </li>
+          <li class="page-item"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          <li class="page-item">
+            <a class="page-link" href="#">Next</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+
+  {% endblock content%}
