@@ -1,5 +1,5 @@
 :root {
-    --primary: #049ccc;
+    --primary: #c43d8e;
     --light: #ffffff;
     --grey: #efefef03;
 }
@@ -7,7 +7,7 @@
 body {
     overflow: hidden;
     font-family: 'Muli', sans-serif;
-    font-weight: 100;
+    font-weight: 90;
     color: var(--primary);
 }
 
@@ -34,20 +34,20 @@ a:hover {
 }
 
 #sidebar-container {
-    min-height: 100vh;
+    min-height: 90vh;
 }
   
 #sidebar-container .logo{
-    padding: 3rem 1rem;
+    padding: 1rem 1rem;
 
 }
 
 .logo{
-    padding: 3rem 1rem;
+    padding: 1rem 1rem;
 }
   
 #sidebar-container .menu {
-    width: 16rem;
+    width: 10rem;
     padding: 1rem;
 
     font-weight: bold;
@@ -56,11 +56,11 @@ a:hover {
 #content {
     overflow-y: auto;
     height: 100vh;
-    padding-bottom: 5rem;
+    padding-bottom: 3rem;
 }
 
 .avatar {
-    max-width: 35px;
+    max-width: 30px;
 }
 
 .btn-search {

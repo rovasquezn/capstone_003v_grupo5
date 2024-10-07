@@ -41,66 +41,64 @@
                     </div>
                 </form>
 
-
+                <br>
 
                 <!-- Tabla de Recetas -->
 
-                <table class="table table-condensed">
-                    <table class="table table-striped mb-0">
+                <style>
+                    .table-condensed {
+                        font-size: 13px;
+                        /* Ajusta este valor según lo necesites */
+                    }
 
-                        <thead>
-                            <tr>
-                                <th scope="col">Id</th>
-                                <th scope="col">RUN</th>
-                                <th scope="col">Nombre</th>
-                                <th scope="col">Numero de Receta</th>
-                                <th scope="col">Fecha Receta</th>
-                                <th scope="col">Lejos OD</th>
-                                <th scope="col">Lejos OI</th>
-                                <th scope="col">Cerca OD</th>
-                                <th scope="col">Cerca OI</th>
-                                <th scope="col">DP Cerca</th>
-                                <th scope="col">DP Lejos</th>
-                                <th scope="col">Tipo Lente</th>
-                                <th scope="col">Institucion</th>
-                                <th scope="col">Doctor Oftalmologo</th>
-                                <th scope="col">Fecha Creacion</th>
+                    .table-condensed th,
+                    .table-condensed td {
+                        padding-top: 13px;
+                        padding-bottom: 10px;
+                        /* Reduce el espacio entre celdas */
+                    }
+                </style>
 
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for receta in object_list %}
-                            <tr>
-                                <td>{{ receta.idReceta |default:'-' }}</td>
-                                <td> {{receta.rutCliente}}-{{receta.dvRutCliente}}</td>
-                                <td class="text-uppercase"> {{ receta.nombreCliente }} {{ receta.apPaternoCliente }}
-                                    {{ receta.apMaternoCliente |default:'-' }}</td>
+                <table class="table table-condensed table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Id</th>
+                            <th scope="col">RUN</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Numero de Receta</th>
+                            <th scope="col">Fecha Receta</th>
 
-                                <td>{{ receta.numeroReceta |default:'-' }}</td>
-                                <td>{{ receta.fechaReceta |default:'-' }}</td>
-                                <td>{{ receta.lejosOd |default:'-' }}</td>
-                                <td>{{ receta.lejosOi |default:'-' }}</td>
-                                <td>{{ receta.cercaOd |default:'-' }}</td>
-                                <td>{{ receta.cercaOi |default:'-' }}</td>
-                                <td>{{ receta.dpCerca |default:'-' }}</td>
-                                <td>{{ receta.dpLejos |default:'-' }}</td>
-                                <td>{{ receta.tipoLente |default:'-' }}</td>
-                                <td>{{ receta.institucion |default:'-' }}</td>
-                                <td>{{ receta.doctorOftalmologo |default:'-' }}</td>
-                                <td>{{ receta.creacionReceta |date:'d/m/Y h:i A' }}</td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{% url 'receta_edit' receta.pk %}" class="btn btn-primary">Editar</a>
-                                        <a href="{% url 'receta_delete' receta.pk %}"
-                                            class="btn btn-danger">Eliminar</a>
-                                    </div>
-                                </td>
-                            </tr>
+                            <th scope="col">Tipo Lente</th>
+                            <th scope="col">Institucion</th>
+                            <th scope="col">Doctor Oftalmologo</th>
+                            <th scope="col">Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for receta in object_list %}
+                        <tr>
+                            <td>{{ receta.idReceta |default:'-' }}</td>
+                            <td>{{ receta.rutCliente }}-{{ receta.dvRutCliente }}</td>
+                            <td class="text-uppercase">{{ receta.nombreCliente }} {{ receta.apPaternoCliente }}
+                                {{ receta.apMaternoCliente |default:'-' }}</td>
+                            <td>{{ receta.numeroReceta |default:'-' }}</td>
+                            <td>{{ receta.fechaReceta |date:'d/m/Y' }}</td>
 
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            <td class="text-uppercase">{{ receta.tipoLente |default:'-' }}</td>
+                            <td class="text-uppercase">{{ receta.institucion |default:'-' }}</td>
+                            <td class="text-uppercase">{{ receta.doctorOftalmologo |default:'-' }}</td>
+                            <td class="text-uppercase">{{ receta.observacionReceta |default:'-' }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'receta_edit' receta.pk %}" class="btn btn-primary">Editar</a>
+                                    <a href="{% url 'receta_delete' receta.pk %}" class="btn btn-danger">Eliminar</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
+
 
             </div>
         </div>

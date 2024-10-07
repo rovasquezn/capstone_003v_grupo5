@@ -78,47 +78,58 @@
                         </button>
                     </div>
                 </form>
-
+                <br>
                 <!-- Tabla de Clientes -->
 
-                <table class="table table-condensed">
-                    <table class="table table-striped mb-0">
+                <style>
+                    .table-condensed {
+                        font-size: 13px;
+                        /* Ajusta este valor según lo necesites */
+                    }
 
-                        <thead>
-                            <tr>
-                                <th scope="col">RUN</th>
-                                <th scope="col">Nombre</th>
-                                <th scope="col">Celular</th>
-                                <th scope="col">Telefono</th>
-                                <th scope="col">Email</th>
-                                <th scope="col">Direccion</th>
-                                <th scope="col">Fecha Creacion</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cliente in object_list %}
-                            <tr>
-                                <td> {{cliente.rutCliente}}-{{cliente.dvRutCliente}}</td>
-                                <td class="text-uppercase"> {{ cliente.nombreCliente }} {{ cliente.apPaternoCliente }}
-                                    {{ cliente.apMaternoCliente |default:'-' }}</td>
-                                <td>{{ cliente.celularCliente |default:'-' }}</td>
-                                <td>{{ cliente.telefonoCliente |default:'-' }}</td>
-                                <td class="text-uppercase"> {{ cliente.emailCliente |default:'-' }}
-                                </td>
-                                <td class="text-uppercase"> {{ cliente.direccionCliente |default:'-' }}
-                                </td>
-                                <td>{{ cliente.creacionCliente |date:'d/m/Y h:i A' }}</td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{% url 'cliente_edit' cliente.pk %}" class="btn btn-primary">Editar</a>
-                                        <a href="{% url 'cliente_delete' cliente.pk %}"
-                                            class="btn btn-danger">Eliminar</a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    .table-condensed th,
+                    .table-condensed td {
+                        padding-top: 10px;
+                        padding-bottom: 6px;
+                        /* Reduce el espacio entre celdas */
+                    }
+                </style>
+
+                <table class="table table-condensed table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">RUN</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Celular</th>
+                            <th scope="col">Telefono</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Direccion</th>
+                            <th scope="col">Fecha Creacion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cliente in object_list %}
+                        <tr>
+                            <td> {{cliente.rutCliente}}-{{cliente.dvRutCliente}}</td>
+                            <td class="text-uppercase"> {{ cliente.nombreCliente }} {{ cliente.apPaternoCliente }}
+                                {{ cliente.apMaternoCliente |default:'-' }}</td>
+                            <td>{{ cliente.celularCliente |default:'-' }}</td>
+                            <td>{{ cliente.telefonoCliente |default:'-' }}</td>
+                            <td class="text-uppercase"> {{ cliente.emailCliente |default:'-' }}
+                            </td>
+                            <td class="text-uppercase"> {{ cliente.direccionCliente |default:'-' }}
+                            </td>
+                            <td>{{ cliente.creacionCliente |date:'d/m/Y h:i A' }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'cliente_edit' cliente.pk %}" class="btn btn-primary">Editar</a>
+                                    <a href="{% url 'cliente_delete' cliente.pk %}" class="btn btn-danger">Eliminar</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
                 </table>
 
             </div>

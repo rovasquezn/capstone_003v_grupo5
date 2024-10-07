@@ -78,7 +78,7 @@ class RecetaView(viewsets.ModelViewSet):
 # Create your views here.
 class ListarClienteView(generic.ListView):
     model = Cliente
-    paginate_by = 6
+    paginate_by = 8
 
     def get_queryset(self) -> QuerySet[Any]:
         q = self.request.GET.get('q')
@@ -124,7 +124,7 @@ class EliminarClienteView(generic.DeleteView):
 
 class ListarRecetaView(generic.ListView):
     model = Receta
-    paginate_by = 6
+    paginate_by = 8
     
     def get_queryset(self) -> QuerySet[Any]: 
         q = self.request.GET.get('q')
