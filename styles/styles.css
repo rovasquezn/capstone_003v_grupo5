@@ -1,5 +1,5 @@
 :root {
-    --primary: #c82687;
+    --primary: #618e19;
     --light: #ffffff;
     --grey: #efefef03;
 }
@@ -7,7 +7,7 @@
 body {
     overflow: hidden;
     font-family: 'Muli', sans-serif;
-    font-weight: 300;
+    font-weight: 50;
     color: var(--primary);
 }
 
@@ -67,7 +67,7 @@ a:hover {
 }
 
   
-@media (max-width: 768px) {
+@media (max-width: 780px) {
     #sidebar-container {
       display: none;
     }
