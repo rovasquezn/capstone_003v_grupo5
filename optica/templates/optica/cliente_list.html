@@ -4,6 +4,32 @@
 
 {% block content%}
 
+
+{% if messages %}
+{% for message in messages %}
+<div id="mensajeConfirmacion" class="alert-success align-items-center text-bg-success border-0" role="alert"
+    aria-live="assertive" aria-atomic="true" style="position: fixed; top: 20px; right: 20px; min-width: 250px;">
+    <div class="d-flex">
+        <div class="toast-body">
+            {{ message }}
+        </div>
+        <!-- <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="alert" aria-label="Close"></button> -->
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var toastEl = document.getElementById('mensajeConfirmacion');
+        if (toastEl) {  // Asegurarse de que el elemento exista
+            var toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+            toast.show();
+        }
+    });
+</script>
+
 <!-- Page Content -->
 <div id="content" class="bg-grey w-100">
 
@@ -22,46 +48,6 @@
             </div>
         </div>
     </section>
-
-    <!-- <section class="bg-mix py-3">
-        <div class="container">
-            <div class="card rounded-0">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-3 col-md-6 d-flex stat my-3">
-                            <div class="mx-auto">
-                                <h6 class="text-muted">Ingresos mensuales</h6>
-                                <h3 class="font-weight-bold">$50000</h3>
-                                <h6 class="text-success"><i class="icon ion-md-arrow-dropup-circle"></i> 50.50%</h6>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6 d-flex stat my-3">
-                            <div class="mx-auto">
-                                <h6 class="text-muted">Productos activos</h6>
-                                <h3 class="font-weight-bold">100</h3>
-                                <h6 class="text-success"><i class="icon ion-md-arrow-dropup-circle"></i> 25.50%</h6>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6 d-flex stat my-3">
-                            <div class="mx-auto">
-                                <h6 class="text-muted">No. de usuarios</h6>
-                                <h3 class="font-weight-bold">2500</h3>
-                                <h6 class="text-success"><i class="icon ion-md-arrow-dropup-circle"></i> 75.50%</h6>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6 d-flex my-3">
-                            <div class="mx-auto">
-                                <h6 class="text-muted">Usuarios nuevos</h6>
-                                <h3 class="font-weight-bold">500</h3>
-                                <h6 class="text-success"><i class="icon ion-md-arrow-dropup-circle"></i> 15.50%</h6>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section> -->
-
 
     <div class="mt-0">
         <div class="container-fluid w-100">
@@ -83,14 +69,14 @@
 
                 <style>
                     .table-condensed {
-                        font-size: 13px;
+                        font-size: 12px;
                         /* Ajusta este valor según lo necesites */
                     }
 
                     .table-condensed th,
                     .table-condensed td {
-                        padding-top: 10px;
-                        padding-bottom: 6px;
+                        padding-top: 13px;
+                        padding-bottom: 5px;
                         /* Reduce el espacio entre celdas */
                     }
                 </style>
@@ -207,4 +193,5 @@
     </div>
 
 </div>
+
 {% endblock content %}

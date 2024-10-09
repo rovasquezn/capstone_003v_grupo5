@@ -4,6 +4,7 @@
 {% block content%}
 
 
+
 <!-- Page Content -->
 <div id="content" class="bg-grey w-100">
 
@@ -19,7 +20,35 @@
         </div>
     </section>
 
+
+
     <div class="alert alert-danger mt-5 text-center mx-auto" style="max-width: 450px;">
+        <span class="fw-bold">
+            ¿Estás seguro de eliminar el contacto
+            <br>
+            {{ cliente.nombreCliente }} {{ cliente.apPaternoCliente }} {{cliente.apMaternoCliente |default:'' }}?
+        </span>
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            <a href="{% url 'cliente_list' %}" class="btn btn-secondary me-1">Cancelar</a>
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+        </form>
+    </div>
+
+
+
+    <script>
+        // Ocultar el mensaje de confirmación después de 2 segundos
+        setTimeout(function () {
+            var mensaje = document.getElementById('mensajeConfirmacion');
+            if (mensaje) {
+                var alert = new bootstrap.Alert(mensaje);
+                alert.close();
+            }
+        }, 2000);
+    </script>
+
+    <!-- <div class="alert alert-danger mt-5 text-center mx-auto" style="max-width: 450px;">
         <span class="fw-bold">
             ¿Estás seguro de eliminar el contacto
             <br>
@@ -29,12 +58,8 @@
             {% csrf_token %}
 
             <a href="{% url 'cliente_list' %}" class="btn btn-secondary me-1">Cancelar</a>
-
-            <button class="btn btn-danger">
-                Sí, eliminar
-            </button>
         </form>
-    </div>
+    </div> -->
 
 
 

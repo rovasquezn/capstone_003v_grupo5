@@ -4,6 +4,32 @@
 
 {% block content%}
 
+
+{% if messages %}
+{% for message in messages %}
+<div id="mensajeConfirmacion" class="alert-success align-items-center text-bg-success border-0" role="alert"
+    aria-live="assertive" aria-atomic="true" style="position: fixed; top: 20px; right: 20px; min-width: 250px;">
+    <div class="d-flex">
+        <div class="toast-body">
+            {{ message }}
+        </div>
+        <!-- <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="alert" aria-label="Close"></button> -->
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var toastEl = document.getElementById('mensajeConfirmacion');
+        if (toastEl) {  // Asegurarse de que el elemento exista
+            var toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+            toast.show();
+        }
+    });
+</script>
+
 <!-- Page Content -->
 <div id="content" class="bg-grey w-100">
 
@@ -47,14 +73,14 @@
 
                 <style>
                     .table-condensed {
-                        font-size: 13px;
+                        font-size: 12px;
                         /* Ajusta este valor según lo necesites */
                     }
 
                     .table-condensed th,
                     .table-condensed td {
                         padding-top: 13px;
-                        padding-bottom: 10px;
+                        padding-bottom: 5px;
                         /* Reduce el espacio entre celdas */
                     }
                 </style>
@@ -75,6 +101,10 @@
                         </tr>
                     </thead>
                     <tbody>
+
+
+
+
                         {% for receta in object_list %}
                         <tr>
                             <td>{{ receta.idReceta |default:'-' }}</td>

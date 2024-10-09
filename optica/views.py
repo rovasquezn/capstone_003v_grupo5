@@ -3,8 +3,11 @@ from .serializer import ClienteSerializer
 from .serializer import RecetaSerializer
 from .models import Cliente, Receta
 
+from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
+
 from typing import Any
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 
 from django.views import generic
@@ -90,7 +93,7 @@ class ListarClienteView(generic.ListView):
         return super().get_queryset()
     
 
-class CrearClienteView(generic.CreateView):
+class CrearClienteView(SuccessMessageMixin, generic.CreateView):
     model = Cliente
     fields = ('rutCliente', 
     'dvRutCliente', 
@@ -102,10 +105,10 @@ class CrearClienteView(generic.CreateView):
     'emailCliente',
     'direccionCliente',)
     success_url = reverse_lazy('cliente_list')
+    success_message = "El cliente se ha creado exitosamente."
 
 
-
-class EditarClienteView(generic.UpdateView):
+class EditarClienteView(SuccessMessageMixin, generic.UpdateView):
     model = Cliente
     fields = ('nombreCliente',
     'apPaternoCliente',
@@ -115,11 +118,12 @@ class EditarClienteView(generic.UpdateView):
     'emailCliente',
     'direccionCliente',)
     success_url = reverse_lazy('cliente_list')
+    success_message = "El cliente se ha editado exitosamente."
 
-
-class EliminarClienteView(generic.DeleteView):
+class EliminarClienteView(SuccessMessageMixin, generic.DeleteView):
     model = Cliente
     success_url = reverse_lazy('cliente_list')
+    success_message = "El cliente se ha eliminado exitosamente."
 
 
 class ListarRecetaView(generic.ListView):
@@ -136,8 +140,7 @@ class ListarRecetaView(generic.ListView):
         return super().get_queryset()
     
 
-class CrearRecetaView(generic.CreateView):
-    
+class CrearRecetaView(SuccessMessageMixin, generic.CreateView):
     model = Receta
     fields = ('idReceta',
     'rutCliente',
@@ -158,21 +161,9 @@ class CrearRecetaView(generic.CreateView):
     'tipoLente',
     'institucion',
     'doctorOftalmologo',
-    'observacionReceta')
+    'observacionReceta',)
     success_url = reverse_lazy('receta_list')
-    
-    # def __init__(self, *args, **kwargs):
-    #     super(RecetaForm, self).__init__(*args, **kwargs)
-        
-    #     # Bloquear los campos para que sean solo lectura
-    #     self.fields['rutCliente'].widget.attrs['readonly'] = True
-    #     self.fields['dvRutCliente'].widget.attrs['readonly'] = True
-    #     self.fields['nombreCliente'].widget.attrs['readonly'] = True
-    #     self.fields['apPaternoCliente'].widget.attrs['readonly'] = True
-    #     self.fields['apMaternoCliente'].widget.attrs['readonly'] = True
-    #     self.fields['celularCliente'].widget.attrs['readonly'] = True
-    #     self.fields['telefonoCliente'].widget.attrs['readonly'] = True
-        
+    success_message = "La receta se ha creado exitosamente."
 
 
     template_name = 'optica/receta_form.html'  # Cambia esto al nombre de tu template
@@ -198,22 +189,30 @@ class CrearRecetaView(generic.CreateView):
             'celularCliente': cliente.celularCliente if cliente else '',
             'telefonoCliente': cliente.telefonoCliente if cliente else '',
         })
-        
-        return render(request, self.template_name, {'form': form, 'cliente': cliente})
     
+        return render(request, self.template_name, {'form': form, 'cliente': cliente})
+
+    # def post(self, request):
+    #     form = RecetaForm(request.POST)
+        
+    #     if form.is_valid():
+    #         form.save()  # Guardar la receta
+    #         return redirect('receta_list')  # Redirige a la lista de recetas
+        
+    #     return render(request, self.template_name, {'form': form})
+
     def post(self, request):
         form = RecetaForm(request.POST)
         
         if form.is_valid():
-            form.save()  # Guardar la receta
-            return redirect('receta_list')  # Redirige a la lista de recetas
+            receta = form.save()  # Guardar la receta
+            messages.success(request, self.success_message)  # Añadir el mensaje de éxito
+            return redirect(self.success_url)  # Redirige a la lista de recetas
         
         return render(request, self.template_name, {'form': form})
 
 
-
-
-class EditarRecetaView(generic.UpdateView):
+class EditarRecetaView(SuccessMessageMixin, generic.UpdateView):
     model = Receta
     fields = ('numeroReceta', 
     'fechaReceta', 
@@ -227,8 +226,10 @@ class EditarRecetaView(generic.UpdateView):
     'institucion',
     'doctorOftalmologo',)
     success_url = reverse_lazy('receta_list')
+    success_message = "La receta se ha editado exitosamente."
 
 
-class EliminarRecetaView(generic.DeleteView):
+class EliminarRecetaView(SuccessMessageMixin, generic.DeleteView):
     model = Receta
     success_url = reverse_lazy('receta_list')
+    success_message = "La receta se ha eliminado exitosamente."
