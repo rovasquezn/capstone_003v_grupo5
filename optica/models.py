@@ -101,10 +101,17 @@ class Receta(models.Model):
         # Guardar normalmente después de eliminar   la imagen anterior
         super().save(*args, **kwargs)
     
-    def delete(self, using=None, keep_parents=False):
-        self.imagenReceta.storage.delete(self.imagenReceta.name)
-        super().delete()
+    # def delete(self, using=None, keep_parents=False):
+    #     self.imagenReceta.storage.delete(self.imagenReceta.name)
+    #     super().delete()
     
+    def delete(self, using=None, keep_parents=False):
+    # Borra la imagen asociada si existe
+        if self.imagenReceta:
+            self.imagenReceta.storage.delete(self.imagenReceta.name)
+
+    # Llamar al método delete del modelo base pasando los argumentos correctos
+        super().delete(using=using, keep_parents=keep_parents)
     
 class Abono(models.Model): 
     idAbono = models.AutoField(primary_key=True, default=1)
