@@ -15,6 +15,7 @@ from django.db.models import QuerySet
 from django.db.models import Q
 
 from .forms import RecetaForm 
+from django import forms
 from django.views import View
 
 # from .serializer import AtendedorSerializer
@@ -82,16 +83,37 @@ class RecetaView(viewsets.ModelViewSet):
 class ListarClienteView(generic.ListView):
     model = Cliente
     paginate_by = 8
+    ordering = ['-creacionCliente']  # Ordena por el campo 'creacionCliente' en orden descendente
 
-    def get_queryset(self) -> QuerySet[Any]:
+    # def get_queryset(self) -> QuerySet[Any]:
+    #     q = self.request.GET.get('q')
+
+    #     if q:
+    #         return Cliente.objects.filter(
+    #             Q(nombreCliente__icontains=q) | Q(apPaternoCliente__icontains=q)| Q(rutCliente__icontains=q))
+        
+    #     return super().get_queryset()
+    
+    
+    
+    def get_queryset(self):
         q = self.request.GET.get('q')
 
+        queryset = super().get_queryset()
+
         if q:
-            return Cliente.objects.filter(
-                Q(nombreCliente__icontains=q) | Q(apPaternoCliente__icontains=q)| Q(rutCliente__icontains=q))
-        
-        return super().get_queryset()
-    
+            queryset = queryset.filter(
+                Q(nombreCliente__icontains=q) |
+                Q(apPaternoCliente__icontains=q) |
+                Q(rutCliente__icontains=q)
+            )
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q', '')  # Mantener el valor de la búsqueda en el contexto
+        return context
 
 class CrearClienteView(SuccessMessageMixin, generic.CreateView):
     model = Cliente
@@ -129,6 +151,8 @@ class EliminarClienteView(SuccessMessageMixin, generic.DeleteView):
 class ListarRecetaView(generic.ListView):
     model = Receta
     paginate_by = 8
+    ordering = ['-creacionReceta']
+    
     
     def get_queryset(self) -> QuerySet[Any]: 
         q = self.request.GET.get('q')
@@ -138,7 +162,6 @@ class ListarRecetaView(generic.ListView):
                 Q(rutCliente__rutCliente__icontains=q)
             )
         return super().get_queryset()
-    
 
 class CrearRecetaView(SuccessMessageMixin, generic.CreateView):
     model = Receta
@@ -152,16 +175,30 @@ class CrearRecetaView(SuccessMessageMixin, generic.CreateView):
     'telefonoCliente',
     'numeroReceta', 
     'fechaReceta', 
-    'lejosOd',
-    'lejosOi',
-    'cercaOd', 
-    'cercaOi',
+    'lejosOdEsfera', 
+    'lejosOdCilindro', 
+    'lejosOdEje', 
+    'lejosOiEsfera', 
+    'lejosOiCilindro',
+    'lejosOiEje', 
+    'dpLejos', 
+    'cercaOdEsfera', 
+    'cercaOdCilindro', 
+    'cercaOdEje', 
+    'cercaOiEsfera', 
+    'cercaOiCilindro', 
+    'cercaOiEje',
     'dpCerca', 
-    'dpLejos',
     'tipoLente',
     'institucion',
     'doctorOftalmologo',
+    'imagenReceta',
     'observacionReceta',)
+    
+    
+    widgets = {
+            'imagenReceta': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
     success_url = reverse_lazy('receta_list')
     success_message = "La receta se ha creado exitosamente."
 
@@ -176,8 +213,10 @@ class CrearRecetaView(SuccessMessageMixin, generic.CreateView):
         if rut_cliente:
             try:
                 cliente = Cliente.objects.get(rutCliente=rut_cliente)
+                messages.success(request, "Cliente encontrado")
             except Cliente.DoesNotExist:
                 cliente = None
+                messages.error(request, "Cliente no encontrado")
         
         # Cargar formulario de receta, si existe cliente, se pueden prellenar campos
         form = RecetaForm(initial={
@@ -192,17 +231,9 @@ class CrearRecetaView(SuccessMessageMixin, generic.CreateView):
     
         return render(request, self.template_name, {'form': form, 'cliente': cliente})
 
-    # def post(self, request):
-    #     form = RecetaForm(request.POST)
-        
-    #     if form.is_valid():
-    #         form.save()  # Guardar la receta
-    #         return redirect('receta_list')  # Redirige a la lista de recetas
-        
-    #     return render(request, self.template_name, {'form': form})
 
     def post(self, request):
-        form = RecetaForm(request.POST)
+        form = RecetaForm(request.POST, request.FILES)
         
         if form.is_valid():
             receta = form.save()  # Guardar la receta
@@ -210,21 +241,32 @@ class CrearRecetaView(SuccessMessageMixin, generic.CreateView):
             return redirect(self.success_url)  # Redirige a la lista de recetas
         
         return render(request, self.template_name, {'form': form})
-
+    
 
 class EditarRecetaView(SuccessMessageMixin, generic.UpdateView):
     model = Receta
     fields = ('numeroReceta', 
     'fechaReceta', 
-    'lejosOd',
-    'lejosOi',
-    'cercaOd', 
-    'cercaOi',
+    'lejosOdEsfera', 
+    'lejosOdCilindro', 
+    'lejosOdEje', 
+    'lejosOiEsfera', 
+    'lejosOiCilindro',
+    'lejosOiEje', 
+    'dpLejos', 
+    'cercaOdEsfera', 
+    'cercaOdCilindro', 
+    'cercaOdEje', 
+    'cercaOiEsfera', 
+    'cercaOiCilindro', 
+    'cercaOiEje',
     'dpCerca', 
-    'dpLejos',
     'tipoLente',
     'institucion',
-    'doctorOftalmologo',)
+    'doctorOftalmologo',
+    'imagenReceta',
+    'observacionReceta'
+    )
     success_url = reverse_lazy('receta_list')
     success_message = "La receta se ha editado exitosamente."
 
@@ -233,3 +275,4 @@ class EliminarRecetaView(SuccessMessageMixin, generic.DeleteView):
     model = Receta
     success_url = reverse_lazy('receta_list')
     success_message = "La receta se ha eliminado exitosamente."
+

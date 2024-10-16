@@ -13,7 +13,6 @@
         <div class="toast-body">
             {{ message }}
         </div>
-        <!-- <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="alert" aria-label="Close"></button> -->
     </div>
 </div>
 {% endfor %}
@@ -23,7 +22,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         var toastEl = document.getElementById('mensajeConfirmacion');
-        if (toastEl) {  // Asegurarse de que el elemento exista
+        if (toastEl) {
             var toast = new bootstrap.Toast(toastEl, { delay: 3000 });
             toast.show();
         }
@@ -79,7 +78,7 @@
 
                     .table-condensed th,
                     .table-condensed td {
-                        padding-top: 13px;
+                        padding-top: 5px;
                         padding-bottom: 5px;
                         /* Reduce el espacio entre celdas */
                     }
@@ -98,6 +97,7 @@
                             <th scope="col">Institucion</th>
                             <th scope="col">Doctor Oftalmologo</th>
                             <th scope="col">Observaciones</th>
+                            <th scope="col">Imagen</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -110,7 +110,7 @@
                             <td>{{ receta.idReceta |default:'-' }}</td>
                             <td>{{ receta.rutCliente }}-{{ receta.dvRutCliente }}</td>
                             <td class="text-uppercase">{{ receta.nombreCliente }} {{ receta.apPaternoCliente }}
-                                {{ receta.apMaternoCliente |default:'-' }}</td>
+                                {{ receta.apMaternoCliente |default:'' }}</td>
                             <td>{{ receta.numeroReceta |default:'-' }}</td>
                             <td>{{ receta.fechaReceta |date:'d/m/Y' }}</td>
 
@@ -118,13 +118,361 @@
                             <td class="text-uppercase">{{ receta.institucion |default:'-' }}</td>
                             <td class="text-uppercase">{{ receta.doctorOftalmologo |default:'-' }}</td>
                             <td class="text-uppercase">{{ receta.observacionReceta |default:'-' }}</td>
+                            <!-- Imagen en la tabla con enlace para abrir el modal -->
+                            <td>
+                                {% if receta.imagenReceta %}
+                                <!-- Al hacer clic en la imagen, se activa el modal -->
+                                <img src="{{ receta.imagenReceta.url }}" height="40" data-bs-toggle="modal"
+                                    data-bs-target="#imagenModal-{{ receta.idReceta }}" style="cursor: pointer;" />
+                                {% else %}
+                                <span>Imagen no disponible</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Modal de Bootstrap para mostrar la imagen en tamaño completo -->
+                            <div class="modal fade" id="imagenModal-{{ receta.idReceta }}" tabindex="-1"
+                                aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Detalle de la imagen</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            {% if receta.imagenReceta %}
+                                            <img src="{{ receta.imagenReceta.url }}" alt="Imagen de receta"
+                                                style="max-height: 60%; max-width: 80%; height: auto; width: auto;">
+                                            {% endif %}
+                                            <!-- Ajusta el tamaño de la imagen -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- Modal de Bootstrap para mostrar la imagen en tamaño completo -->
+                            <!-- <div class="modal fade" id="imagenModal-{{ receta.idReceta }}" tabindex="-1"
+                                aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Detalle de la Imagen</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            {% if receta.imagenReceta %}
+                                            <img src="{{ receta.imagenReceta.url }}" alt="Imagen de receta"
+                                                style="max-width: 90%; height: auto;">
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> -->
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{% url 'receta_edit' receta.pk %}" class="btn btn-primary">Editar</a>
-                                    <a href="{% url 'receta_delete' receta.pk %}" class="btn btn-danger">Eliminar</a>
+                                    <button type="button" class="btn btn-info" data-bs-toggle="modal"
+                                        data-bs-target="#recetaModal{{ receta.idReceta }}">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+
+                                    <a href="{% url 'receta_edit' receta.pk %}" class="btn btn-primary">
+                                        <i class="bi bi-pencil"></i> <!-- Icono de lápiz para editar -->
+                                    </a>
+                                    <a href="{% url 'receta_delete' receta.pk %}" class="btn btn-danger">
+                                        <i class="bi bi-trash"></i> <!-- Icono de basura para eliminar -->
+                                    </a>
                                 </div>
                             </td>
                         </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="modal-condensed">
+                            <div class="modal fade" id="recetaModal{{ receta.idReceta }}" tabindex="-1"
+                                aria-labelledby="recetaModalLabel{{ receta.idReceta }}" aria-hidden="true">
+
+                                <div class="modal-dialog" style=" max-width: 40%;">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" style="font-weight: bold;"
+                                                id="recetaModalLabel{{ receta.idReceta }} ">
+                                                Detalle de la Receta - ID {{ receta.idReceta |default:'' }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+
+                                        <div class="modal-body">
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">RUN:</span>
+                                                        {{ receta.rutCliente }}-{{ receta.dvRutCliente }}
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Cliente:</span>
+                                                        <span id="letras-modal">{{ receta.nombreCliente |upper }}
+                                                            {{ receta.apPaternoCliente |upper }}
+                                                            {{ receta.apMaternoCliente|default:'' |upper }}</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Celular:</span>
+                                                        {{ receta.celularCliente |default:'' }}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Teléfono:</span>
+                                                        {{ receta.telefonoCliente |default:'' }}</p>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Número de
+                                                            Receta:</span>
+                                                        {{ receta.numeroReceta |default:'' }}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Fecha:</span>
+                                                        {{ receta.fechaReceta | date:'d/m/Y' |default:'' }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12 text-center">
+                                                    <hr style="width: 100%; border: 1px solid #06818e;">
+                                                </div>
+                                            </div>
+
+
+
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p class="font-weight-bold" id="texto-modal">Lejos</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col" style="width: 10%;">
+                                                    <p>---</p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Esfera</span></p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Cilindro</span>
+                                                    </p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Eje</span></p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">DP</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col" style="width: 12%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">OD</span></p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.lejosOdEsfera |default:'' }}</p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.lejosOdCilindro |default:'' }}</p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.lejosOdEje |default:'' }}</p>
+                                                </div>
+
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.dpLejos |default:'' }}</p>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row">
+                                                <div class="col" style="width: 12%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">OI</span></p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.lejosOiEsfera |default:'' }}</p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.lejosOiCilindro |default:'' }}</p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.lejosOiEje |default:'' }}</p>
+                                                </div>
+
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p></p>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row">
+                                                <div class="col-md-12 text-center">
+                                                    <hr style="width: 100%; border: 1px solid #06818e;">
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p class="font-weight-bold" id="texto-modal">Cerca</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col" style="width: 12%;">
+                                                    <p>---</p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Esfera</span></p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Cilindro</span>
+                                                    </p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Eje</span></p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">DP</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col" style="width: 12%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">OD</span></p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.cercaOdEsfera |default:'' }}</p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.cercaOdCilindro |default:'' }}</p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.cercaOdEje |default:'' }}</p>
+                                                </div>
+
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.dpCerca |default:'' }}</p>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row">
+                                                <div class="col" style="width: 12%;">
+                                                    <p><span class="font-weight-bold" id="texto-modal">OI</span></p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.cercaOiEsfera |default:'' }}</p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.cercaOiCilindro |default:'' }}</p>
+                                                </div>
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p>{{ receta.cercaOiEje |default:'' }}</p>
+                                                </div>
+
+
+                                                <div class="col" style="width: 22%;">
+                                                    <p></p>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row">
+                                                <div class="col-md-12 text-center">
+                                                    <hr style="width: 100%; border: 1px solid #06818e;">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Tipo de
+                                                            lente:</span>
+                                                        {{ receta.tipoLente|default:""|upper }}</p>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold"
+                                                            id="texto-modal">Institución:</span>
+                                                        {{ receta.institucion|default:""|upper }}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">
+                                                            Doctor(a) Oftalmología:</span>
+                                                        {{ receta.doctorOftalmologo |default:""|upper }}</p>
+                                                </div>
+                                            </div>
+                                            <!-- Observaciones pueden ir en una sola fila ocupando ambas columnas -->
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <p><span class="font-weight-bold"
+                                                            id="texto-modal">Observaciones:</span>
+                                                        {{ receta.observacionReceta |default:""|upper }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Cerrar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
                         {% endfor %}
                     </tbody>
                 </table>

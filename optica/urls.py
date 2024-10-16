@@ -2,6 +2,9 @@ from django.urls import include, path
 from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
 from optica import views
+# from django.contrib.staticfiles.urls import static
+from django.conf.urls.static import static
+from django.conf import settings
 
 router = routers.DefaultRouter()
 #router.register(r'cliente', views.ClienteView, 'Cliente')
@@ -12,6 +15,7 @@ router = routers.DefaultRouter()
 # router.register(r'ordentrabajo', views.OrdenTrabajoView, 'Orden de Trabajo')
 # router.register(r'certificado', views.CertificadoView, 'Certificado')
 # router.register(r'administrador', views.AdministradorView, 'Administrador')
+
 
 
 urlpatterns = [
@@ -30,3 +34,6 @@ urlpatterns = [
     path('<int:pk>/receta_delete/', views.EliminarRecetaView.as_view(), name='receta_delete'),
     
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

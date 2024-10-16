@@ -29,8 +29,20 @@ a:hover {
 }
 
 .btn-primary:hover {
-    background-color: var(--primary);
-    
+    background-color: var(--primary); 
+}
+
+
+.custom-modal-width {
+    max-width: 70%; /* Puedes ajustar este valor según lo que necesites */
+}
+
+#texto-modal {
+    color:rgb(7, 85, 78)
+}
+
+#letras-modal {
+    color:#103bd7
 }
 
 #sidebar-container {
@@ -56,7 +68,9 @@ a:hover {
     overflow-y: auto;
     height: 100vh;
     padding-bottom: 2rem;
+    
 }
+
 
 .avatar {
     max-width: 30px;
@@ -85,6 +99,10 @@ a:hover {
     font-size: 5px;
   }
 
+  .modal-condensed{
+    font-size: 14px;
+  }
+
   .scrollable-form {
     max-height: 400px; /* Ajusta este valor según el tamaño que necesites */
     overflow-y: auto;
@@ -93,4 +111,7 @@ a:hover {
 .card-center{
     justify-content: center;
    
+}
+.modal-backdrop {
+    backdrop-filter: blur(5px);  /* Difumina el fondo */
 }

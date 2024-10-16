@@ -1,3 +1,4 @@
+import os
 from django.db import models
 
 class Cliente(models.Model):
@@ -46,8 +47,8 @@ class Tecnico(models.Model):
 
 class Receta(models.Model):
     idReceta = models.BigAutoField(primary_key=True)
-    rutCliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)#este campo rutCliente necesito que en mi tabla Receta sea clave foranea del campo rutCliente de tabla Cliente
-    dvRutCliente = models.CharField(max_length=1, null=True, blank=True, verbose_name="Digito Verificador")
+    rutCliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name="RUN" )#este campo rutCliente necesito que en mi tabla Receta sea clave foranea del campo rutCliente de tabla Cliente
+    dvRutCliente = models.CharField(max_length=1, null=True, blank=True, verbose_name="Dígito")
     nombreCliente = models.CharField(max_length=20, null=True, blank=True, verbose_name="Nombre")
     apPaternoCliente = models.CharField(max_length=20, null=True, blank=True, verbose_name="Apellido Paterno")
     apMaternoCliente = models.CharField(max_length=20, null=True, blank=True, verbose_name="Apellido Materno")
@@ -56,20 +57,53 @@ class Receta(models.Model):
     numeroReceta = models.IntegerField(null=True, blank=True, verbose_name="Numero de Receta")
     fechaReceta = models.DateField(null=True, blank=True, verbose_name="Fecha Receta") 
     creacionReceta = models.DateTimeField(auto_now_add=True)
-    lejosOd = models.CharField(max_length=10, null=True, blank=True, verbose_name="Lejos OD")
-    lejosOi = models.CharField(max_length=10, null=True, blank=True, verbose_name="Lejos OI")
-    cercaOd = models.CharField(max_length=10, null=True, blank=True, verbose_name="Cerca OD")
-    cercaOi = models.CharField(max_length=10, null=True, blank=True, verbose_name="Cerca OI")
-    dpCerca = models.CharField(max_length=10, null=True, blank=True, verbose_name="DP Cerca")
-    dpLejos = models.CharField(max_length=10, null=True, blank=True, verbose_name="DP Lejos")
+    imagenReceta = models.ImageField(upload_to='imagenes/', null=True, blank=True, verbose_name="Imagen")
+    
+    lejosOdEsfera = models.CharField(max_length=10, null=True, blank=True, verbose_name="Esfera")
+    lejosOdCilindro = models.CharField(max_length=10, null=True, blank=True, verbose_name="Cilindro")
+    lejosOdEje = models.CharField(max_length=10, null=True, blank=True, verbose_name="Eje")
+    
+    lejosOiEsfera = models.CharField(max_length=10, null=True, blank=True, verbose_name="Esfera")
+    lejosOiCilindro = models.CharField(max_length=10, null=True, blank=True, verbose_name="Cilindro")
+    lejosOiEje = models.CharField(max_length=10, null=True, blank=True, verbose_name="Eje")
+    
+    dpLejos = models.CharField(max_length=10, null=True, blank=True, verbose_name="Distancia Pupilar")
+
+    cercaOdEsfera = models.CharField(max_length=10, null=True, blank=True, verbose_name="Esfera")
+    cercaOdCilindro = models.CharField(max_length=10, null=True, blank=True, verbose_name="Cilindro")
+    cercaOdEje = models.CharField(max_length=10, null=True, blank=True, verbose_name="Eje")
+
+    cercaOiEsfera = models.CharField(max_length=10, null=True, blank=True, verbose_name="Esfera")
+    cercaOiCilindro = models.CharField(max_length=10, null=True, blank=True, verbose_name="Cilindro")
+    cercaOiEje = models.CharField(max_length=10, null=True, blank=True, verbose_name="Eje")
+
+    dpCerca = models.CharField(max_length=10, null=True, blank=True, verbose_name="Distancia Pupilar")
+   
     tipoLente = models.CharField(max_length=20, null=True, blank=True, verbose_name="Tipo de Lente")
     institucion = models.CharField(max_length=20, null=True, blank=True, verbose_name="Institucion")
-    doctorOftalmologo = models.CharField(max_length=40, null=True, blank=True, verbose_name="Tecnologo Oftalmologia")
-    linkFotoReceta = models.CharField(max_length=200, null=True, blank=True)
+    doctorOftalmologo = models.CharField(max_length=40, null=True, blank=True, verbose_name="Médico Oftalmología")
     observacionReceta = models.CharField(max_length=300, null=True, blank=True, verbose_name="Observaciones")
 
     def __str__(self):
         return f"{self.idReceta}"
+    
+    def save(self, *args, **kwargs):
+        # Verificar si ya hay una imagen antes de guardar la nueva
+        try:
+            this = Receta.objects.get(idReceta=self.idReceta)
+            if this.imagenReceta != self.imagenReceta and this.imagenReceta:
+                # Si la imagen ha cambiado, eliminar la anterior
+                if os.path.isfile(this.imagenReceta.path):
+                    os.remove(this.imagenReceta.path)
+        except Receta.DoesNotExist:
+            pass  # El objeto no existe aún (primera vez que se guarda)
+        
+        # Guardar normalmente después de eliminar   la imagen anterior
+        super().save(*args, **kwargs)
+    
+    def delete(self, using=None, keep_parents=False):
+        self.imagenReceta.storage.delete(self.imagenReceta.name)
+        super().delete()
     
     
 class Abono(models.Model): 
