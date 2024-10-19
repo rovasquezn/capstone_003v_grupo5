@@ -19,6 +19,10 @@ from .forms import RecetaForm
 from django import forms
 from django.views import View
 
+import os
+from django.http import FileResponse
+from django.conf import settings
+
 # from .serializer import AtendedorSerializer
 # from .serializer import TecnicoSerializer
 # from .serializer import RecetaSerializer
@@ -78,6 +82,13 @@ class AdministradorView(viewsets.ModelViewSet):
 
 
 
+
+def index(request):
+    # Construir la ruta completa del archivo index.html en la raíz
+    file_path = os.path.join(settings.BASE_DIR, 'index.html')
+    
+    # Devolver el archivo como respuesta
+    return FileResponse(open(file_path, 'rb'), content_type='text/html')
 
 
 # Create your views here.

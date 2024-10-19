@@ -6,6 +6,7 @@ from optica import views
 from django.conf.urls.static import static
 from django.conf import settings
 
+from django.views.generic import TemplateView
 router = routers.DefaultRouter()
 #router.register(r'cliente', views.ClienteView, 'Cliente')
 # router.register(r'atendedor', views.AtendedorView, 'Atendedor')
@@ -21,8 +22,9 @@ router = routers.DefaultRouter()
 urlpatterns = [
     #path("api/v1/", include(router.urls)),
     path('docs/', include_docs_urls(title='Optica API')),
-
-    path('', views.ListarClienteView.as_view(), name='cliente_list'),
+    
+    path('', views.index, name='index'),
+    path('cliente_list/', views.ListarClienteView.as_view(), name='cliente_list'),
     path('cliente_new/', views.CrearClienteView.as_view(), name='cliente_new'),    
     path('<int:pk>/cliente_edit/', views.EditarClienteView.as_view(), name='cliente_edit'),
     path('<int:pk>/cliente_delete/', views.EliminarClienteView.as_view(), name='cliente_delete'),
