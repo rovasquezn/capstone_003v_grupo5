@@ -58,8 +58,8 @@ class RecetaSerializer(serializers.ModelSerializer):
 #         fields = '__all__'
 
 
-# class AdministradorSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Administrador
-#         # fields = ('id', 'title', 'description', 'done')
-#         fields = '__all__'
+class AdministradorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Administrador
+        # fields = ('id', 'title', 'description', 'done')
+        fields = '__all__'

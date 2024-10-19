@@ -1,7 +1,8 @@
 from rest_framework import viewsets
 from .serializer import ClienteSerializer
 from .serializer import RecetaSerializer
-from .models import Cliente, Receta
+from .serializer import AdministradorSerializer
+from .models import Cliente, Receta, Administrador
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
@@ -70,9 +71,9 @@ class RecetaView(viewsets.ModelViewSet):
 #     queryset = Certificado.objects.all()
 
 
-# class AdministradorView(viewsets.ModelViewSet):
-#     serializer_class = AdministradorSerializer
-#     queryset = Administrador.objects.all()
+class AdministradorView(viewsets.ModelViewSet):
+    serializer_class = AdministradorSerializer
+    queryset = Administrador.objects.all()
 
 
 
@@ -173,6 +174,9 @@ class CrearRecetaView(SuccessMessageMixin, generic.CreateView):
     'apMaternoCliente',
     'celularCliente',
     'telefonoCliente',
+    # 'rutAdministrador', 
+    'rutTecnico', 
+    'rutAtendedor', 
     'numeroReceta', 
     'fechaReceta', 
     'lejosOdEsfera', 
