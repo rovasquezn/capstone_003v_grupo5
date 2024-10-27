@@ -1,8 +1,10 @@
 from rest_framework import viewsets
 from .serializer import ClienteSerializer
 from .serializer import RecetaSerializer
+# from .serializer import OrdenTrabajoSerializer
+
 from .serializer import AdministradorSerializer
-from .models import Cliente, Receta, Administrador
+from .models import Cliente, Receta, OrdenTrabajo, Administrador
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
@@ -16,6 +18,8 @@ from django.db.models import QuerySet
 from django.db.models import Q
 
 from .forms import RecetaForm 
+from .forms import OrdenTrabajoForm 
+
 from django import forms
 from django.views import View
 
@@ -160,6 +164,8 @@ class EliminarClienteView(SuccessMessageMixin, generic.DeleteView):
     success_message = "El cliente se ha eliminado exitosamente."
 
 
+#RECETAS
+
 class ListarRecetaView(generic.ListView):
     model = Receta
     paginate_by = 8
@@ -171,6 +177,7 @@ class ListarRecetaView(generic.ListView):
         if q:
             return Receta.objects.filter(
                 Q(rutCliente__nombreCliente__icontains=q) | 
+                Q(rutCliente__apPaternoCliente__icontains=q) | 
                 Q(rutCliente__rutCliente__icontains=q)
             )
         return super().get_queryset()
@@ -233,7 +240,7 @@ class CrearRecetaView(SuccessMessageMixin, generic.CreateView):
                 cliente = None
                 messages.error(request, "Cliente no encontrado")
         
-        # Cargar formulario de receta, si existe cliente, se pueden prellenar campos
+        # Cargar formulario de receta con datos del Cliente, si existe cliente, se pueden prellenar campos
         form = RecetaForm(initial={
             'rutCliente': cliente.rutCliente if cliente else '',
             'dvRutCliente': cliente.dvRutCliente if cliente else '', 
@@ -290,4 +297,207 @@ class EliminarRecetaView(SuccessMessageMixin, generic.DeleteView):
     model = Receta
     success_url = reverse_lazy('receta_list')
     success_message = "La receta se ha eliminado exitosamente."
+
+#ORDEN DE TRABAJO
+
+class ListarOrdenTrabajoView(generic.ListView):
+    model = OrdenTrabajo
+    paginate_by = 8
+    ordering = ['-fechaEntregaOrdenTrabajo']
+    
+    
+    def get_queryset(self) -> QuerySet[Any]: 
+        q = self.request.GET.get('q')
+        if q:
+            return OrdenTrabajo.objects.filter(
+                Q(rutCliente__nombreCliente__icontains=q) | 
+                Q(rutCliente__apPaternoCliente__icontains=q) | 
+                Q(rutCliente__rutCliente__icontains=q)
+            )
+        return super().get_queryset()
+
+class CrearOrdenTrabajoView(SuccessMessageMixin, generic.CreateView):
+    model = OrdenTrabajo
+    fields = ('idReceta',
+    'rutCliente',
+    # 'dvRutCliente',
+    # 'nombreCliente',
+    # 'apPaternoCliente',
+    # 'apMaternoCliente',
+    # 'celularCliente',
+    # 'telefonoCliente',
+    # # 'rutAdministrador', 
+    # 'rutTecnico', 
+    # 'rutAtendedor', 
+    # 'numeroReceta', 
+    # 'fechaReceta', 
+    # 'lejosOdEsfera', 
+    # 'lejosOdCilindro', 
+    # 'lejosOdEje', 
+    # 'lejosOiEsfera', 
+    # 'lejosOiCilindro',
+    # 'lejosOiEje', 
+    # 'dpLejos', 
+    # 'cercaOdEsfera', 
+    # 'cercaOdCilindro', 
+    # 'cercaOdEje', 
+    # 'cercaOiEsfera', 
+    # 'cercaOiCilindro', 
+    # 'cercaOiEje',
+    # 'dpCerca', 
+    # 'tipoLente',
+    # 'institucion',
+    # 'doctorOftalmologo',
+    # 'imagenReceta',
+    # 'observacionReceta'
+    'fechaOrdenTrabajo',
+    'fechaEntregaOrdenTrabajo',
+    'horaEntregaOrdenTrabajo',
+    'laboratorioLejos',
+    'gradoLejosOd',
+    'gradoLejosOi',
+    'prismaLejosOd',
+    'prismaLejosOi',
+    'adicionLejosOd', 
+    'adicionLejosOi',
+    'tipoCristalLejos',
+    'colorLejos',
+    'marcoLejos',
+    'valorMarcoLejos', 
+    'valorCristalesLejos',
+    'totalLejos',
+    'altura',
+    'laboratorioCerca',
+    'gradoCercaOd',
+    'gradoCercaOi',
+    'prismaCercaOd',
+    'prismaCercaOi',
+    'adicionCercaOd',
+    'adicionCercaOi',
+    'tipoCristalCerca',
+    'colorCerca',
+    'marcoCerca',
+    'valorMarcoCerca',
+    'valorCristalesCerca', 
+    'totalCerca',
+    'totalOrdenTrabajo',
+    'numeroVoucherOrdenTrabajo',
+    'observacionOrdenTrabajo',)
+    
+    
+    # widgets = {
+    #         'imagenReceta': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+    #     }
+    success_url = reverse_lazy('ordenTrabajo_list')
+    success_message = "La Orden de Trabajo se ha creado exitosamente."
+
+
+    template_name = 'optica/ordenTrabajo_form.html'  # Cambia esto al nombre de tu template
+    
+    
+      
+    
+    def get(self, request):
+        receta = None
+        id_receta = request.GET.get('id_receta')
+          
+        if id_receta:
+            try:
+                receta = Receta.objects.get(idReceta=id_receta)
+                messages.success(request, "Receta encontrada")
+            except Receta.DoesNotExist:
+                receta = None
+                messages.error(request, "Receta no encontrada") 
+                
+        
+        # Cargar formulario de Orden de Trabajo con datos de la Receta, si existe Receta, se pueden prellenar campos
+        form = OrdenTrabajoForm(initial={        
+            'rutCliente': receta.rutCliente if receta else '',
+            'dvRutCliente': receta.dvRutCliente if receta else '',
+            'nombreCliente': receta.nombreCliente if receta else '',
+            'apPaternoCliente': receta.apPaternoCliente if receta else '',
+            'apMaternoCliente': receta.apMaternoCliente if receta else '',
+            'celularCliente': receta.celularCliente if receta else '',
+            'telefonoCliente': receta.telefonoCliente if receta else '',
+            # # 'rutAdministrador', 
+            # # 'rutTecnico', 
+            # # 'rutAtendedor', 
+            'numeroReceta': receta.numeroReceta if receta else '', 
+            'fechaReceta': receta.fechaReceta if receta else '', 
+            'lejosOdEsfera': receta.lejosOdEsfera if receta else '', 
+            'lejosOdCilindro': receta.lejosOdCilindro if receta else '', 
+            'lejosOdEje': receta.lejosOdEje if receta else '', 
+            'lejosOiEsfera': receta.lejosOiEsfera if receta else '', 
+            'lejosOiCilindro': receta.lejosOiCilindro if receta else '',
+            'lejosOiEje': receta.lejosOiEje if receta else '', 
+            'dpLejos': receta.dpLejos if receta else '', 
+            'cercaOdEsfera': receta.cercaOdEsfera if receta else '', 
+            'cercaOdCilindro': receta.cercaOdCilindro if receta else '', 
+            'cercaOdEje': receta.cercaOdEje if receta else '', 
+            'cercaOiEsfera': receta.cercaOiEsfera if receta else '', 
+            'cercaOiCilindro': receta.cercaOiCilindro if receta else '', 
+            'cercaOiEje': receta.cercaOiEje if receta else '',
+            'dpCerca': receta.dpCerca if receta else '', 
+            'tipoLente': receta.tipoLente if receta else '',
+            'institucion': receta.institucion if receta else '',
+            'doctorOftalmologo': receta.doctorOftalmologo if receta else '',
+            'observacionReceta': receta.rutCliente if receta else '',            
+            })
+    
+        return render(request, self.template_name, {'form': form, 'receta': receta})
+
+     
+    def post(self, request):
+        form = OrdenTrabajoForm(request.POST)
+        
+        if form.is_valid():
+            OrdenTrabajo = form.save()  # Guardar la receta
+            messages.success(request, self.success_message)  # Añadir el mensaje de éxito
+            return redirect(self.success_url)  # Redirige a la lista de recetas
+        
+        return render(request, self.template_name, {'form': form})
+    
+
+class EditarOrdenTrabajoView(SuccessMessageMixin, generic.UpdateView):
+    model = OrdenTrabajo
+    fields = (# 'fechaOrdenTrabajo',
+    'valorOrdenTrabajo',
+    'fechaEntregaOrdenTrabajo',
+    'horaEntregaOrdenTrabajo',
+    'creacionOrdenTrabajo',
+    'laboratorioLejos',
+    'gradoLejosOd',
+    'gradoLejosOi',
+    'prismaLejosOd',
+    'prismaLejosOi',
+    'tipoCristalLejos',
+    'colorLejos',
+    'marcoLejos',
+    'valorMarcoLejos', 
+    'valorCristalesLejos',
+    # 'totalLejos',
+    'altura',
+    'laboratorioCerca',
+    'gradoCercaOd',
+    'gradoCercaOi',
+    'prismaCercaOd',
+    'prismaCercaOi',
+    'tipoCristalCerca',
+    'colorCerca',
+    'marcoCerca',
+    'valorMarcoCerca',
+    'valorCristalesCerca', 
+    # 'totalCerca',
+    # 'totalOrdenTrabajo',
+    'numeroVoucherOrdenTrabajo',
+    'observacionOrdenTrabajo',
+    )
+    success_url = reverse_lazy('ordenTrabajo_list')
+    success_message = "La Orden de Trabajo se ha editado exitosamente."
+
+
+class EliminarOrdenTrabajoView(SuccessMessageMixin, generic.DeleteView):
+    model = OrdenTrabajo
+    success_url = reverse_lazy('ordenTrabajo_list')
+    success_message = "La Orden de Trabajo se ha eliminado exitosamente."
 

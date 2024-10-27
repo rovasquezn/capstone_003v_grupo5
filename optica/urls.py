@@ -35,6 +35,11 @@ urlpatterns = [
     path('<int:pk>/receta_edit/', views.EditarRecetaView.as_view(), name='receta_edit'),
     path('<int:pk>/receta_delete/', views.EliminarRecetaView.as_view(), name='receta_delete'),
     
+    path('ordenTrabajo_list', views.ListarOrdenTrabajoView.as_view(), name='ordenTrabajo_list'),
+    path('ordenTrabajo_new/', views.CrearOrdenTrabajoView.as_view(), name='ordenTrabajo_new'),    
+    path('<int:pk>/ordenTrabajo_edit/', views.EditarOrdenTrabajoView.as_view(), name='ordenTrabajo_edit'),
+    path('<int:pk>/ordenTrabajo_delete/', views.EliminarOrdenTrabajoView.as_view(), name='ordenTrabajo_delete'),
+    
 ]
 
 if settings.DEBUG:
