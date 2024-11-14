@@ -1,16 +1,16 @@
 from rest_framework import viewsets
-from .serializer import ClienteSerializer
-from .serializer import RecetaSerializer
+# from .serializer import ClienteSerializer
+# from .serializer import RecetaSerializer
 # from .serializer import OrdenTrabajoSerializer
 
-from .serializer import AdministradorSerializer
+# from .serializer import AdministradorSerializer
 from .models import Cliente, Receta, OrdenTrabajo, Administrador
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 
 from typing import Any
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 
 from django.views import generic
@@ -26,6 +26,8 @@ from django.views import View
 import os
 from django.http import FileResponse
 from django.conf import settings
+from datetime import datetime
+from django.db.models import Max
 
 # from .serializer import AtendedorSerializer
 # from .serializer import TecnicoSerializer
@@ -44,9 +46,9 @@ from django.conf import settings
 # from .models import Administrador
 
 # Create your views here.
-class ClienteView(viewsets.ModelViewSet):
-    serializer_class = ClienteSerializer
-    queryset = Cliente.objects.all()
+# class ClienteView(viewsets.ModelViewSet):
+#     serializer_class = ClienteSerializer
+#     queryset = Cliente.objects.all()
 
 
 # class AtendedorView(viewsets.ModelViewSet):
@@ -59,9 +61,9 @@ class ClienteView(viewsets.ModelViewSet):
 #     queryset = Tecnico.objects.all()
 
 
-class RecetaView(viewsets.ModelViewSet):
-    serializer_class = RecetaSerializer
-    queryset = Receta.objects.all()
+# class RecetaView(viewsets.ModelViewSet):
+#     serializer_class = RecetaSerializer
+#     queryset = Receta.objects.all()
 
 
 # class AbonoView(viewsets.ModelViewSet):
@@ -79,9 +81,9 @@ class RecetaView(viewsets.ModelViewSet):
 #     queryset = Certificado.objects.all()
 
 
-class AdministradorView(viewsets.ModelViewSet):
-    serializer_class = AdministradorSerializer
-    queryset = Administrador.objects.all()
+# class AdministradorView(viewsets.ModelViewSet):
+#     serializer_class = AdministradorSerializer
+#     queryset = Administrador.objects.all()
 
 
 
@@ -298,59 +300,46 @@ class EliminarRecetaView(SuccessMessageMixin, generic.DeleteView):
     success_url = reverse_lazy('receta_list')
     success_message = "La receta se ha eliminado exitosamente."
 
+
+
 #ORDEN DE TRABAJO
 
 class ListarOrdenTrabajoView(generic.ListView):
     model = OrdenTrabajo
     paginate_by = 8
-    ordering = ['-fechaEntregaOrdenTrabajo']
+    ordering = ['-fechaOrdenTrabajo']
     
-    
-    def get_queryset(self) -> QuerySet[Any]: 
+    def get_queryset(self) -> QuerySet[Any]:
         q = self.request.GET.get('q')
         if q:
             return OrdenTrabajo.objects.filter(
-                Q(rutCliente__nombreCliente__icontains=q) | 
-                Q(rutCliente__apPaternoCliente__icontains=q) | 
-                Q(rutCliente__rutCliente__icontains=q)
+                Q(idReceta__rutCliente__nombreCliente__icontains=q) | 
+                Q(idReceta__rutCliente__apPaternoCliente__icontains=q) | 
+                Q(idReceta__rutCliente__rutCliente__icontains=q)
             )
         return super().get_queryset()
+ 
+    
+    # def get_queryset(self) -> QuerySet[Any]: 
+    #     q = self.request.GET.get('q')
+    #     if q:
+    #         return OrdenTrabajo.objects.filter(
+    #             Q(idReceta__rutCliente__cliente__nombreCliente__icontains=q) | 
+    #             Q(idReceta__rutCliente__cliente__apPaternoCliente__icontains=q) | 
+    #             Q(idReceta__rutCliente__rutCliente__icontains=q)
+    #         )
+    #     return super().get_queryset()
 
 class CrearOrdenTrabajoView(SuccessMessageMixin, generic.CreateView):
     model = OrdenTrabajo
-    fields = ('idReceta',
-    'rutCliente',
-    # 'dvRutCliente',
-    # 'nombreCliente',
-    # 'apPaternoCliente',
-    # 'apMaternoCliente',
-    # 'celularCliente',
-    # 'telefonoCliente',
-    # # 'rutAdministrador', 
-    # 'rutTecnico', 
-    # 'rutAtendedor', 
-    # 'numeroReceta', 
-    # 'fechaReceta', 
-    # 'lejosOdEsfera', 
-    # 'lejosOdCilindro', 
-    # 'lejosOdEje', 
-    # 'lejosOiEsfera', 
-    # 'lejosOiCilindro',
-    # 'lejosOiEje', 
-    # 'dpLejos', 
-    # 'cercaOdEsfera', 
-    # 'cercaOdCilindro', 
-    # 'cercaOdEje', 
-    # 'cercaOiEsfera', 
-    # 'cercaOiCilindro', 
-    # 'cercaOiEje',
-    # 'dpCerca', 
-    # 'tipoLente',
-    # 'institucion',
-    # 'doctorOftalmologo',
-    # 'imagenReceta',
-    # 'observacionReceta'
-    'fechaOrdenTrabajo',
+    fields = (
+    'idReceta',
+    # 'rutAdministrador', 
+    'rutTecnico', 
+    'rutAtendedor', 
+    'idOrdenTrabajo',
+    'numeroOrdenTrabajo',
+    # 'fechaOrdenTrabajo'
     'fechaEntregaOrdenTrabajo',
     'horaEntregaOrdenTrabajo',
     'laboratorioLejos',
@@ -361,7 +350,7 @@ class CrearOrdenTrabajoView(SuccessMessageMixin, generic.CreateView):
     'adicionLejosOd', 
     'adicionLejosOi',
     'tipoCristalLejos',
-    'colorLejos',
+    'colorCristalLejos',
     'marcoLejos',
     'valorMarcoLejos', 
     'valorCristalesLejos',
@@ -375,43 +364,60 @@ class CrearOrdenTrabajoView(SuccessMessageMixin, generic.CreateView):
     'adicionCercaOd',
     'adicionCercaOi',
     'tipoCristalCerca',
-    'colorCerca',
+    'colorCristalCerca',
     'marcoCerca',
     'valorMarcoCerca',
     'valorCristalesCerca', 
     'totalCerca',
     'totalOrdenTrabajo',
+    'tipoPago',
     'numeroVoucherOrdenTrabajo',
-    'observacionOrdenTrabajo',)
+    'observacionOrdenTrabajo'
+    )
     
-    
-    # widgets = {
-    #         'imagenReceta': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-    #     }
     success_url = reverse_lazy('ordenTrabajo_list')
     success_message = "La Orden de Trabajo se ha creado exitosamente."
-
-
     template_name = 'optica/ordenTrabajo_form.html'  # Cambia esto al nombre de tu template
     
-    
-      
-    
+
+    def generar_numero_orden(self):
+        # Lógica para calcular el siguiente número de orden
+        ultimo_valor = OrdenTrabajo.objects.aggregate(max_val=Max('numeroOrdenTrabajo'))['max_val']
+        return (ultimo_valor + 1) if ultimo_valor and ultimo_valor >= 6000 else 6000
+
     def get(self, request):
         receta = None
         id_receta = request.GET.get('id_receta')
-          
+
         if id_receta:
             try:
                 receta = Receta.objects.get(idReceta=id_receta)
-                messages.success(request, "Receta encontrada")
+                messages.success(request, "Receta encontrada") 
             except Receta.DoesNotExist:
-                receta = None
-                messages.error(request, "Receta no encontrada") 
-                
-        
-        # Cargar formulario de Orden de Trabajo con datos de la Receta, si existe Receta, se pueden prellenar campos
-        form = OrdenTrabajoForm(initial={        
+                messages.error(request, "Receta no encontrada")
+
+        numero_orden = self.generar_numero_orden()
+
+
+
+        # # Inicializa el formulario con el número de orden y la receta si está presente
+        # form = OrdenTrabajoForm(initial={
+        #     'numeroOrdenTrabajo': numero_orden,
+        #     'idReceta': receta.idReceta if receta else None
+        # })
+
+        # return render(request, self.template_name, {
+        #     'form': form,
+        #     'receta': receta
+        # })
+    
+    
+    
+    
+        form = OrdenTrabajoForm(initial={  
+            'numeroOrdenTrabajo': numero_orden,
+            'idReceta': receta.idReceta if receta else '',
+                                   
             'rutCliente': receta.rutCliente if receta else '',
             'dvRutCliente': receta.dvRutCliente if receta else '',
             'nombreCliente': receta.nombreCliente if receta else '',
@@ -441,63 +447,87 @@ class CrearOrdenTrabajoView(SuccessMessageMixin, generic.CreateView):
             'tipoLente': receta.tipoLente if receta else '',
             'institucion': receta.institucion if receta else '',
             'doctorOftalmologo': receta.doctorOftalmologo if receta else '',
-            'observacionReceta': receta.rutCliente if receta else '',            
+            'observacionReceta': receta.observacionReceta if receta else '',           
             })
     
         return render(request, self.template_name, {'form': form, 'receta': receta})
+    
+    
 
-     
     def post(self, request):
         form = OrdenTrabajoForm(request.POST)
+        receta = None 
+        id_receta = request.GET.get('id_receta')  # Captura el `id_receta` del parámetro de consulta
+
+        if id_receta:
+            try:
+                # Obtén la receta con el `id_receta` proporcionado
+                receta = Receta.objects.get(idReceta=id_receta)
+                
+                if form.is_valid():
+                    orden_trabajo = form.save(commit=False)
+                    orden_trabajo.idReceta = receta  # Asigna la receta a la orden de trabajo
+                    orden_trabajo.save()  # Guarda la orden de trabajo
+                    
+                    messages.success(request, "Orden de Trabajo creada con éxito.")
+                    return redirect(self.success_url)  # Redirige tras guardar
+                    
+            except Receta.DoesNotExist:
+                messages.error(request, "Receta no encontrada.")
+        else:
+            messages.error(request, "No se proporcionó un ID de receta válido.")
         
-        if form.is_valid():
-            OrdenTrabajo = form.save()  # Guardar la receta
-            messages.success(request, self.success_message)  # Añadir el mensaje de éxito
-            return redirect(self.success_url)  # Redirige a la lista de recetas
-        
-        return render(request, self.template_name, {'form': form})
-    
+        # Si no es válido, muestra el formulario de nuevo con los mensajes de error
+        return render(request, self.template_name, {'form': form, 'receta': receta})
+
 
 class EditarOrdenTrabajoView(SuccessMessageMixin, generic.UpdateView):
     model = OrdenTrabajo
-    fields = (# 'fechaOrdenTrabajo',
-    'valorOrdenTrabajo',
+    fields = (
     'fechaEntregaOrdenTrabajo',
     'horaEntregaOrdenTrabajo',
-    'creacionOrdenTrabajo',
     'laboratorioLejos',
     'gradoLejosOd',
     'gradoLejosOi',
     'prismaLejosOd',
     'prismaLejosOi',
     'tipoCristalLejos',
-    'colorLejos',
+    'colorCristalLejos',
+    'adicionLejosOd',
+    'adicionLejosOi',
     'marcoLejos',
     'valorMarcoLejos', 
     'valorCristalesLejos',
-    # 'totalLejos',
     'altura',
     'laboratorioCerca',
     'gradoCercaOd',
     'gradoCercaOi',
     'prismaCercaOd',
     'prismaCercaOi',
+    'adicionCercaOd',
+    'adicionCercaOi',
     'tipoCristalCerca',
-    'colorCerca',
+    'colorCristalCerca',
     'marcoCerca',
     'valorMarcoCerca',
     'valorCristalesCerca', 
-    # 'totalCerca',
-    # 'totalOrdenTrabajo',
+    'tipoPago',
     'numeroVoucherOrdenTrabajo',
-    'observacionOrdenTrabajo',
+    'observacionOrdenTrabajo'
     )
     success_url = reverse_lazy('ordenTrabajo_list')
     success_message = "La Orden de Trabajo se ha editado exitosamente."
 
+def get_initial(self):
+        initial = super().get_initial()
+        initial['numeroOrdenTrabajo'] = self.object.numeroOrdenTrabajo  # Valor del modelo
+        return initial
 
+def form_valid(self, form):
+        # Aquí puedes agregar lógica si necesitas procesar el formulario
+        return super().form_valid(form) 
 class EliminarOrdenTrabajoView(SuccessMessageMixin, generic.DeleteView):
     model = OrdenTrabajo
+    # template_name = 'ordenTrabajo_delete'
     success_url = reverse_lazy('ordenTrabajo_list')
     success_message = "La Orden de Trabajo se ha eliminado exitosamente."
-

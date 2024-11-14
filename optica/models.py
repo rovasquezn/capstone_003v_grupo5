@@ -129,21 +129,22 @@ class Receta(models.Model):
     # Llamar al método delete del modelo base pasando los argumentos correctos
         super().delete(using=using, keep_parents=keep_parents)
     
+    def delete_receta(self, idReceta):
+        Receta.objects.filter(idReceta=idReceta).delete()
+    
+    
 
 class OrdenTrabajo(models.Model): 
-    idOrdenTrabajo = models.BigAutoField(primary_key=True, verbose_name="ID Orden de Trabajo")
-    rutCliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name="RUN Cliente") 
-    
+    idReceta = models.ForeignKey(Receta, null=True, blank=True, on_delete=models.CASCADE, verbose_name="ID Receta")
+    # rutCliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name="RUN Cliente") 
     rutAtendedor = models.ForeignKey(Atendedor, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Atendedor") 
     rutTecnico = models.ForeignKey(Tecnico, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Técnico")
     rutAdministrador = models.ForeignKey(Administrador, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Administrador")
-
-    idReceta = models.ForeignKey(Receta, on_delete=models.CASCADE, verbose_name="ID Receta")
-    numeroOrdenTrabajo = models.IntegerField(null=True, blank=True, verbose_name="Total (Lejos)") 
-    fechaOrdenTrabajo = models.DateTimeField(auto_now_add=True, verbose_name="Fecha Orden de Trabajo")
+    idOrdenTrabajo = models.BigAutoField(primary_key=True, verbose_name="ID Orden de Trabajo")
+    numeroOrdenTrabajo = models.IntegerField(verbose_name="Número de Orden de Trabajo") 
+    fechaOrdenTrabajo = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name="Fecha Orden de Trabajo")
     fechaEntregaOrdenTrabajo = models.DateField(null=True, blank=True, verbose_name="Fecha Entrega") 
     horaEntregaOrdenTrabajo = models.TimeField(null=True, blank=True, verbose_name="Hora de Entrega")
- 
     laboratorioLejos = models.CharField(max_length=30, null=True, blank=True, verbose_name="Laboratorio (Lejos)")
     gradoLejosOd = models.CharField(max_length=10, null=True, blank=True, verbose_name="Grado Lejos OD")
     gradoLejosOi = models.CharField(max_length=10, null=True, blank=True, verbose_name="Grado Lejos OI")
@@ -171,13 +172,37 @@ class OrdenTrabajo(models.Model):
     valorMarcoCerca = models.IntegerField(null=True, blank=True, verbose_name="Valor Marco (Cerca)") 
     valorCristalesCerca = models.IntegerField(null=True, blank=True, verbose_name="Valor Cristal (Cerca)") 
     totalCerca = models.IntegerField(null=True, blank=True, verbose_name="Total (Cerca)")     
-    totalOrdenTrabajo= models.IntegerField(null=True, blank=True, verbose_name="Total") 
+    totalOrdenTrabajo = models.IntegerField(null=True, blank=True, verbose_name="Total") 
+    tipoPago = models.CharField(max_length=25, null=True, blank=True, verbose_name="Tipo de Pago") 
     numeroVoucherOrdenTrabajo = models.IntegerField(null=True, blank=True, verbose_name="Número de Voucher")
     observacionOrdenTrabajo = models.CharField(max_length=300, null=True, blank=True, verbose_name="Observaciones")
 
 
     def __str__(self):
-        return f"{self.numeroOrdenTrabajo} {self.fechaOrdenTrabajo} {self.totalOrdenTrabajo}"
+        return f"{self.idOrdenTrabajo}"
+    
+    def save(self, *args, **kwargs):
+ 
+        if not self.numeroOrdenTrabajo:
+            ultimo_valor = OrdenTrabajo.objects.aggregate(max_val=models.Max('numeroOrdenTrabajo'))['max_val']
+            self.numeroOrdenTrabajo = (ultimo_valor + 1) if ultimo_valor and ultimo_valor >= 60000 else 60000
+        super().save(*args, **kwargs)
+
+    
+    
+    def delete_orden_trabajo(self, idOrdenTrabajo):
+        OrdenTrabajo.objects.filter(idOrdenTrabajo=idOrdenTrabajo).delete()
+    # def delete(self, using=None, keep_parents=False):
+    # Borra la imagen asociada si existe
+        # if self.imagenReceta:
+        #     self.imagenReceta.storage.delete(self.imagenReceta.name)
+
+    # Llamar al método delete del modelo base pasando los argumentos correctos
+        # super().delete(using=using, keep_parents=keep_parents)
+        
+        
+        
+        
 
 class Abono(models.Model): 
     idAbono = models.AutoField(primary_key=True, default=1, verbose_name="ID Abono")

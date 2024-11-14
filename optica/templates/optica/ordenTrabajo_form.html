@@ -1,0 +1,847 @@
+{% extends 'optica/base.html' %}
+<!-- {% load static crispy_forms_tags %} -->
+{% load static %}
+{% block content%}
+
+<!-- fixed-top" style="top: 0; z-index: 10;" -->
+
+<!-- Page Content -->
+<div id="content" class="bg-grey w-100 fixed" style="overflow-y: auto; max-height: 100vh;">
+    <section class="bg-light py-3">
+        <div class="container fixed">
+            <!-- <div class=" row"> -->
+            <!-- <div class="col col-lg-9 col-md-8"> -->
+            <h1 class="font-weight-bold mb-0 fixed">
+                {% if not form.idReceta %}
+                Editar Orden de Trabajo
+                {% else %}
+                Crear Orden de Trabajo
+            </h1>
+
+            <!-- Buscar Receta-->
+            <form method="get" action="" style="max-width: 450px;">
+                <div class="input-group mb-2 fixed">
+                    <input type="text" class="form-control" id="id_receta" name="id_receta"
+                        placeholder="Ingrese ID de la Receta" value="{{ request.GET.id_receta }}">
+                    <button type="submit" class="btn btn-primary">Buscar Receta</button>
+                </div>
+            </form>
+
+            <!-- Mostrar mensajes como toasts -->
+            <div id="mensajeConfirmacion" class="alert"
+                style="position: fixed; top:135px; right: 450px; min-width: 250px;">
+                <!-- <div id="mensajeConfirmacion" class="position-fixed top-0 end-0 p-3" style="z-index: 11"> -->
+                {% if messages %}
+                {% for message in messages %}
+                <div class="toast align-items-center text-bg-success{{ message.tags }} border-0"
+                    style="font-weight: bold;" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            {{ message }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                            aria-label="Close"></button>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Incluir el script de Bootstrap para inicializar los toasts -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Inicializa los toasts
+                    var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+                    var toastList = toastElList.map(function (toastEl) {
+                        return new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 }) // 3 segundos de duración
+                    })
+                    toastList.forEach(toast => toast.show()) // Mostrar todos los toasts
+                });
+            </script>
+            {% endif %}
+        </div>
+    </section>
+
+
+
+    <div id="content" class="bg-grey w-100 mb-3" style="overflow-y: auto; max-height: 100vh;">
+        <!-- <div style="overflow-y: auto; max-height: 100vh;"> -->
+        <div class="card-center ml-4 mt-3 mb-5">
+            <div class="card border-success" style="max-width: 86rem;">
+                <div class="card border border-1 shadow rounded p-3 ">
+                    <!-- <div class="scrollable-form"> -->
+
+
+                    <!-- VARIACION DE VISTA PARA CUANDO SE ENCUENTRA A CLIENTE (CAMPOS READONLY) -->
+                    <form action="" method="post" class="mt-3 mb-3 modal-condensed" enctype="multipart/form-data"
+                        novalidate>
+                        {% csrf_token %}
+
+                        {% if form.idReceta %}
+                        <div class="row">
+                            <!-- VARIACION DE VISTA PARA CUANDO SE ENCUENTRA A CLIENTE (CAMPOS READONLY) -->
+                            <div class="col-md-4 ">
+                            </div>
+                            <div class="col-md-5 ml-1 mr-5 mt-3 font-weight-bold">
+                                <h3>Optica Cruz - Orden de Trabajo</h3>
+                            </div>
+                            <div class="col-md-2 ml-1 mt-3">
+                                <label for="numeroOrdenTrabajo">Número de Órden de Trabajo</label>
+                                {{form.numeroOrdenTrabajo}}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 70%; border: 1px solid #839691;">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label for="rutCliente">RUN Cliente</label>
+                                <input value="{{ receta.rutCliente  }}" readonly class="form-control">
+                            </div>
+                            <div style="max-width:50px;">
+                                <label for="dvRutCliente">Dígito</label>
+                                <input value="{{ receta.dvRutCliente  }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-3 ml-5">
+                                <label for="nombreCliente">Nombre</label>
+                                <input value="{{ receta.nombreCliente  }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="apPaternoCliente">Apellido Paterno</label>
+                                <input value="{{ receta.apPaternoCliente }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="apMaternoCliente">Apellido Materno</label>
+                                <input value="{{ receta.apMaternoCliente |default:'' }}" readonly class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label for="celularCliente">Celular</label>
+                                <input value="{{ receta.celularCliente |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="telefonoCliente">Telefono</label>
+                                <input value="{{ receta.telefonoCliente |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="idReceta">ID de Receta</label>
+                                <input value="{{ receta.idReceta }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="numeroReceta">Número de Receta</label>
+                                <input value="{{ receta.numeroReceta |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="fechaReceta">Fecha Receta</label>
+                                <input value="{{ receta.fechaReceta | date:'d/m/Y' |default:'' }}" readonly
+                                    class="form-control">
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 90%; border: 1px solid #839691;">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="row col-md-4 justify-content-center mt-3" style="font-weight: bold;">
+                                <p>--- L E J O S ---</p>
+                            </div>
+                            <div class="row col-md-8 ml-4 justify-content-center mt-3" style="font-weight: bold;">
+                                <p>--- C E R C A ---</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="row col-md-1 ml-3 mt-4" style="max-width:70px;">
+                                <p style="font-weight: bold;">OD</p>
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="lejosOdEsfera">Esfera</label>
+                                <input value="{{ receta.lejosOdEsfera |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="lejosOdCilindro">Cilindro</label>
+                                <input value="{{ receta.lejosOdCilindro |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="lejosOdEje">Eje</label>
+                                <input value="{{ receta.lejosOdEje |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-1 ml-2 mr-5">
+                                <label for="dpLejos">Distancia Pupilar</label>
+                                <input value="{{ receta.dpLejos |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-1 ">
+                            </div>
+                            <div class="row col-md-1 mt-4" style="max-width:70px;">
+                                <p style="font-weight: bold;">OD</p>
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="cercaOdEsfera">Esfera</label>
+                                <input value="{{ receta.cercaOdEsfera |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="cercaOdCilindro">Cilindro</label>
+                                <input value="{{ receta.cercaOdCilindro |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="cercaOdEje">Eje</label>
+                                <input value="{{ receta.cercaOdEje |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-1 ml-2">
+                                <label for="dpCerca">Distancia Pupilar</label>
+                                <input value="{{ receta.dpCerca |default:'' }}" readonly class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="row col-md-1 ml-3 mt-4" style="max-width:70px;">
+                                <p style="font-weight: bold;">OI</p>
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="lejosOiEsfera">Esfera</label>
+                                <input value="{{ receta.lejosOiEsfera |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="lejosOiCilindro">Cilindro</label>
+                                <input value="{{ receta.lejosOiCilindro |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="lejosOiEje">Eje</label>
+                                <input value="{{ receta.lejosOiEje |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-2 ">
+                            </div>
+                            <div class="row col-md-1 ml-5 mt-4" style="max-width:70px;">
+                                <p style="font-weight: bold;"> OI</p>
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="cercaOiEsfera">Esfera</label>
+                                <input value="{{ receta.cercaOiEsfera |default:'' }}" verbose_name="Tipo de Lente"
+                                    readonly class="form-control">
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="cercaOiCilindro">Cilindro</label>
+                                <input value="{{ receta.cercaOiCilindro |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="cercaOiEje">Eje</label>
+                                <input value="{{ receta.cercaOiEje |default:'' }}" readonly class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 90%; border: 1px solid #839691;">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label for="idReceta">ID de Receta</label>
+                                <input value="{{ receta.idReceta }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="numeroReceta">Número de Receta</label>
+                                <input value="{{ receta.numeroReceta |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="fechaReceta">Fecha Receta</label>
+                                <input value="{{ receta.fechaReceta | date:'d/m/Y' |default:'' }}" readonly
+                                    class="form-control">
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="tipolente">Tipo de Lente</label>
+                                <input value="{{ receta.tipoLente |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="institucion">Institución</label>
+                                <input value="{{ receta.institucion |default:'' }}" readonly class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="doctorOftalmologo">Médico Oftalmología</label>
+                                <input value="{{ receta.doctorOftalmologo |default:'' }}" readonly class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="observacionReceta">Observaciones Receta</label>
+                                <input value="{{ receta.observacionReceta |default:'' }}" readonly class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 90%; border: 1px solid #5eb9a4;">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mr-2 ">
+                            </div>
+                            <div class="col-md-2 ml-5">
+                                <label for="fechaEntregaOrdenTrabajo">Fecha de Entrega</label>
+                                <input type="date" id="fechaEntregaOrdenTrabajo" name="fechaEntregaOrdenTrabajo" {{
+                                    form.fechaEntregaOrdenTrabajo }} class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="horaEntregaOrdenTrabajo">Hora de Entrega</label>
+                                <input type="time" id="horaEntregaOrdenTrabajo" name="horaEntregaOrdenTrabajo" {{
+                                    form.horaEntregaOrdenTrabajo }} class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="row col-md-4 justify-content-center mt-3" style="font-weight: bold;">
+                                <p>--- L E J O S ---</p>
+                            </div>
+                            <div class="row col-md-8 ml-4 justify-content-center mt-3" style="font-weight: bold;">
+                                <p>--- C E R C A ---</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="row col-md-1 ml-3 mt-4" style="max-width:70px;">
+                                <p style="font-weight: bold;">OD</p>
+                            </div>
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="gradoLejosOd">Grados</label>
+                                {{ form.gradoLejosOd }}
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="prismaLejosOd">Prisma</label>
+                                {{ form.prismaLejosOd }}
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="adicionLejosOd">Adición</label>
+                                {{ form.adicionLejosOd }}
+                            </div>
+
+                            <div class="col-md-2 ml-5">
+                            </div>
+                            <div class="row col-md-1 mt-3 ml-1" style="max-width:70px;">
+                                <p style="font-weight: bold;">OD</p>
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="gradoCercaOd">Grados</label>
+                                {{ form.gradoCercaOd }}
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="prismaCercaOd">Prisma</label>
+                                {{ form.prismaCercaOd }}
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="adicionCercaOd">Adición</label>
+                                {{ form.adicionCercaOd }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="row col-md-1 ml-3 mt-4" style="max-width:70px;">
+                                <p style="font-weight: bold;">OI</p>
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="gradoLejosOi">Grados</label>
+                                {{ form.gradoLejosOi }}
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="prismaLejosOi">Prisma</label>
+                                {{ form.prismaLejosOi }}
+                            </div>
+                            <div style="max-width:9%;" class="mr-5">
+                                <label for="adicionLejosOia">Adición</label>
+                                {{ form.adicionLejosOi }}
+                            </div>
+                            <div style="max-width:10%;" class="ml-5">
+                                <label for="altura">Altura</label>
+                                {{ form.altura }}
+                            </div>
+                            <div class="row col-md-1 mt-5 ml-5" style="max-width:70px;">
+                                <p style="font-weight: bold;"> OI</p>
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="gradoCercaOi">Grados</label>
+                                {{ form.gradoCercaOi }}
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="prismaCercaOi">Prisma</label>
+                                {{ form.prismaCercaOi }}
+                            </div>
+                            <div style="max-width:9%;">
+                                <label for="adicionCercaOi">Adición</label>
+                                {{ form.adicionCercaOi }}
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="ml-4" style="width:16%;">
+                                <label for="tipoCristalLejos">Tipo de Cristal</label>
+                                {{ form.tipoCristalLejos }}
+                            </div>
+                            <div class="ml-3" style="max-width:10%;">
+                                <label for="colorCristalLejos">Color de Cristal</label>
+                                {{ form.colorCristalLejos }}
+                            </div>
+                            <div class="ml-3" style="max-width:10%;">
+                                <label for="valorCristalesLejos">Valor de Cristal</label>
+                                {{ form.valorCristalesLejos }}
+                            </div>
+
+                            <div style="width:10%;"></div>
+
+                            <div class="ml-3" style="   width:16%;">
+                                <label for="tipoCristalCerca">Tipo de Cristal</label>
+                                {{ form.tipoCristalCerca }}
+                            </div>
+                            <div class="ml-3" style="max-width:10%;">
+                                <label for="colorCristalCerca">Color de Cristal</label>
+                                {{ form.colorCristalCerca }}
+                            </div>
+                            <div class="ml-3" style="max-width:10%;">
+                                <label for="valorCristalesCerca">Valor de Cristal</label>
+                                {{ form.valorCristalesCerca }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 ml-1">
+                                <label for="marcoLejos">Tipo de Marco</label>
+                                {{ form.marcoLejos }}
+                            </div>
+                            <div class="col-md-2 ">
+                                <label for="valorMarcoLejos">Valor Marco</label>
+                                {{ form.valorMarcoLejos }}
+                            </div>
+                            <div class="col-md-1">
+                            </div>
+                            <div class="col-md-3 ">
+                                <label for="marcoCerca">Tipo de Marco</label>
+                                {{ form.marcoCerca }}
+                            </div>
+                            <div class="col-md-2 ml-1">
+                                <label for="valorMarcoCerca">Valor Marco</label>
+                                {{ form.valorMarcoCerca }}
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-3 ml-1">
+                                <label for="laboratorioLejos">Laboratorio</label>
+                                {{ form.laboratorioLejos }}
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="totalLejos">Sub Total</label>
+                                <input type="number" id="totalLejos" name="totalLejos"
+                                    class="form-control form-control-sm" readonly>
+                            </div>
+                            <script>
+                                // Selecciona los campos de los valores
+                                const inputCristales = document.getElementById("id_valorCristalesLejos");
+                                const inputMarco = document.getElementById("id_valorMarcoLejos");
+                                const inputTotal = document.getElementById("totalLejos");
+
+                                // Función para actualizar el valor total en tiempo real
+                                function actualizarTotal() {
+                                    const valorCristales = parseFloat(inputCristales.value) || 0;
+                                    const valorMarco = parseFloat(inputMarco.value) || 0;
+                                    inputTotal.value = valorCristales + valorMarco;
+                                }
+
+                                // Eventos para recalcular el valor total al cambiar los valores
+                                inputCristales.addEventListener("input", actualizarTotal);
+                                inputMarco.addEventListener("input", actualizarTotal);
+                            </script>
+
+                            <div class="col-md-1">
+                            </div>
+                            <div class="col-md-3 ">
+                                <label for="laboratorioCerca">Laboratorio</label>
+                                {{ form.laboratorioCerca }}
+                            </div>
+                            <div class="col-md-2 ml-1">
+                                <label for="totalCerca">SubTotal</label>
+                                <input type="number" id="totalCerca" name="totalCerca"
+                                    class="form-control - form-control-sm" readonly>
+                            </div>
+                            <script>
+                                // Selecciona los campos de los valores
+                                const inputCristales2 = document.getElementById("id_valorCristalesCerca");
+                                const inputMarco2 = document.getElementById("id_valorMarcoCerca");
+                                const inputTotal2 = document.getElementById("totalCerca");
+
+                                // Función para actualizar el valor total en tiempo real
+                                function actualizarTotal() {
+                                    const valorCristales2 = parseFloat(inputCristales2.value) || 0;
+                                    const valorMarco2 = parseFloat(inputMarco2.value) || 0;
+                                    inputTotal2.value = valorCristales2 + valorMarco2;
+                                }
+
+                                // Eventos para recalcular el valor total al cambiar los valores
+                                inputCristales2.addEventListener("input", actualizarTotal);
+                                inputMarco2.addEventListener("input", actualizarTotal);
+                            </script>
+
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 90%; border: 1px solid #5eb9a4;">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 ml-1">
+                                <label for="totalOrdenTrabajo">Valor Total</label>
+                                <input type="number" id="totalOrdenTrabajo" name="totalOrdenTrabajo"
+                                    class="form-control form-control-sm" readonly>
+                            </div>
+
+
+                            <script>
+                                // Selecciona los campos de los valores
+                                const inputCristales3 = document.getElementById("id_valorCristalesCerca");
+                                const inputMarco3 = document.getElementById("id_valorMarcoCerca");
+                                const inputCristales4 = document.getElementById("id_valorCristalesLejos");
+                                const inputMarco4 = document.getElementById("id_valorMarcoLejos");
+                                const inputTotal4 = document.getElementById("totalOrdenTrabajo");
+
+
+
+
+                                // Función para actualizar el valor total en tiempo real
+                                function actualizarTotal() {
+                                    const valorCristales3 = parseFloat(inputCristales3.value) || 0;
+                                    const valorMarco3 = parseFloat(inputMarco3.value) || 0;
+                                    const valorCristales4 = parseFloat(inputCristales4.value) || 0;
+                                    const valorMarco4 = parseFloat(inputMarco4.value) || 0;
+
+                                    inputTotal4.value = valorCristales3 + valorMarco3 + valorCristales4 + valorMarco4;
+                                }
+
+                                // Eventos para recalcular el valor total al cambiar los valores
+                                inputCristales3.addEventListener("input", actualizarTotal);
+                                inputMarco3.addEventListener("input", actualizarTotal);
+                                inputCristales4.addEventListener("input", actualizarTotal);
+                                inputMarco4.addEventListener("input", actualizarTotal);
+                            </script>
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="col-md-3 ">
+                                <label for="tipoPago">Tipo de Pago</label>
+                                {{ form.tipoPago }}
+                            </div>
+                            <div class="col-md-3 ">
+                                <label for="numeroVoucherOrdenTrabajo">Número de Voucher</label>
+                                {{ form.numeroVoucherOrdenTrabajo }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="observacionOrdenTrabajo">Observaciones Orden de Trabajo</label>
+                                {{ form.observacionOrdenTrabajo }}
+                            </div>
+                        </div>
+
+                        {{ form.fechaOrdenTrabajo.as_hidden }}
+                        {{ form.rutAtendedor.as_hidden }}
+                        {{ form.rutTecnico.as_hidden }}
+                        {{ form.rutAdministrador.as_hidden }}
+
+
+                        {% else %}
+                        <!-- EDITAR -->
+
+                        <div class="row text-center">
+                            <!-- VARIACION DE VISTA PARA CUANDO SE ENCUENTRA A CLIENTE (CAMPOS READONLY) -->
+                            <div class="col-md-4 ">
+                            </div>
+                            <div class="font-weight-bold mb-4 mt-3">
+                                <h3>Optica Cruz - Orden de Trabajo</h3>
+                            </div>
+
+                            <!-- <div class="col-md-2 ml-1 mt-3 form-group">
+                                    <label for="numeroOrdenTrabajo">Número de Órden de Trabajo</label>
+                                    <input type="text" name="numeroOrdenTrabajo"
+                                        value="{{ ordenTrabajo.numeroOrdenTrabajo }}" readonly class="form-control">
+                                </div> -->
+
+
+
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-lg-4"></div>
+
+                            <div class="col-md-2 form-group">
+                                <label for="fechaEntregaOrdenTrabajo">Fecha de Entrega</label>
+                                <input type="date" name="fechaEntregaOrdenTrabajo"
+                                    value="{% if form.fechaEntregaOrdenTrabajo.value %}{{ form.fechaEntregaOrdenTrabajo.value|date:'Y-m-d' }}{% else %}{{ ordenTrabajo.fechaEntregaOrdenTrabajo|date:'Y-m-d' }}{% endif %}"
+                                    class="form-control">
+                            </div>
+
+
+
+                            <div class="col-md-2 form-group">
+                                <label for="horaEntregaOrdenTrabajo">Hora de Entrega</label>
+                                <input type="time" name="horaEntregaOrdenTrabajo"
+                                    value="{% if form.horaEntregaOrdenTrabajo.value %}{{ form.horaEntregaOrdenTrabajo.value|time:'H:i' }}{% else %}{{ ordenTrabajo.horaEntregaOrdenTrabajo|time:'H:i' }}{% endif %}"
+                                    class="form-control">
+                            </div>
+
+                        </div>
+
+
+                        <div class="row">
+                            <div class="row col-md-4 justify-content-center mt-3" style="font-weight: bold;">
+                                <p>--- L E J O S ---</p>
+                            </div>
+                            <div class="row col-md-8 ml-4 justify-content-center mt-3" style="font-weight: bold;">
+                                <p>--- C E R C A ---</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="row col-md-1 ml-3 mt-4" style="max-width:70px;">
+                                <p style="font-weight: bold;">OD</p>
+                            </div>
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="gradoLejosOd">Grados</label>
+                                <input type="text" name="gradoLejosOd" value="{{ form.gradoLejosOd.value|default:'' }}"
+                                    class="form-control">
+                            </div>
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="prismaLejosOd">Prisma</label>
+                                <input type="text" name="prismaLejosOd"
+                                    value="{{ form.prismaLejosOd.value|default:'' }}" class="form-control">
+                            </div>
+
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="adicionLejosOd">Adición</label>
+                                <input type="text" name="adicionLejosOd"
+                                    value="{{ form.adicionLejosOd.value|default:'' }}" class="form-control">
+                            </div>
+
+
+
+                            <div class="col-md-2 ml-5">
+                            </div>
+                            <div class="row col-md-1 mt-4 ml-1" style="max-width:70px;">
+                                <p style="font-weight: bold;">OD</p>
+                            </div>
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="gradoCercaOd">Grados</label>
+                                <input type="text" name="gradoCercaOd" value="{{ form.gradoCercaOd.value|default:'' }}"
+                                    class="form-control">
+                            </div>
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="prismaCercaOd">Prisma</label>
+                                <input type="text" name="prismaCercaOd"
+                                    value="{{ form.prismaCercaOd.value|default:'' }}" class="form-control">
+                            </div>
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="adicionCercaOd">Adición</label>
+                                <input type="text" name="adicionCercaOd"
+                                    value="{{ form.adicionCercaOd.value|default:'' }}" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="row col-md-1 ml-3 mt-4" style="max-width:70px;">
+                                <p style="font-weight: bold;">OI</p>
+                            </div>
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="gradoLejosOi" class="form-label">Grados</label>
+                                <input type="text" name="gradoLejosOi" class="form-control"
+                                    value="{{ form.gradoLejosOi.value|default:'' }}">
+                            </div>
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="prismaLejosOi" class="form-label">Prisma</label>
+                                <input type="text" name="prismaLejosOi" class="form-control"
+                                    value="{{ form.prismaLejosOi.value|default:'' }}">
+                            </div>
+                            <div style="max-width:9%;" class="form-group mr-5">
+                                <label for="adicionLejosOia" class="form-label">Adición</label>
+                                <input type="text" name="adicionLejosOi" class="form-control"
+                                    value="{{ form.adicionLejosOi.value|default:'' }}">
+                            </div>
+                            <div style="max-width:10%;" class="form-group ml-5">
+                                <label for="altura" class="form-label">Altura</label>
+                                <input type="text" name="altura" class="form-control"
+                                    value="{{ form.altura.value|default:'' }}">
+                            </div>
+                            <div class="row col-md-1 mt-4 ml-5" style="max-width:70px;">
+                                <p style="font-weight: bold;"> OI</p>
+                            </div>
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="gradoCercaOi" class="form-label">Grados</label>
+                                <input type="text" name="gradoCercaOi" class="form-control"
+                                    value="{{ form.gradoCercaOi.value|default:'' }}">
+                            </div>
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="prismaCercaOi" class="form-label">Prisma</label>
+                                <input type="text" name="prismaCercaOi" class="form-control"
+                                    value="{{ form.prismaCercaOi.value|default:'' }}">
+                            </div>
+                            <div style="max-width:9%;" class="form-group">
+                                <label for="adicionCercaOi" class="form-label">Adición</label>
+                                <input type="text" name="adicionCercaOi" class="form-control"
+                                    value="{{ form.adicionCercaOi.value|default:'' }}">
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-2 ml-1 form-group">
+                                <label for="tipoCristalLejos" class="form-label">Tipo de Cristal</label>
+                                <input type="text" name="tipoCristalLejos" class="form-control"
+                                    value="{{ form.tipoCristalLejos.value|default:'' }}">
+                            </div>
+                            <div style="max-width:10%;" class="form-group">
+                                <label for="colorCristalLejos" class="form-label">Color de Cristal</label>
+                                <input type="text" name="colorCristalLejos" class="form-control"
+                                    value="{{ form.colorCristalLejos.value|default:'' }}">
+                            </div>
+                            <div class="ml-3 mr-4" style="max-width:10%;" class="form-group">
+                                <label for="valorCristalesLejos" class="form-label">Valor de Cristal</label>
+                                <input type="text" name="valorCristalesLejos" class="form-control"
+                                    value="{{ form.valorCristalesLejos.value|default:'' }}">
+                            </div>
+                            <div class="col-md-1">
+                            </div>
+                            <div class="col-md-2 ml-5 form-group">
+                                <label for="tipoCristalCerca" class="form-label">Tipo de Cristal</label>
+                                <input type="text" name="tipoCristalCerca" class="form-control"
+                                    value="{{ form.tipoCristalCerca.value|default:'' }}">
+                            </div>
+                            <div style="max-width:10%;" class="form-group">
+                                <label for="colorCristalCerca" class="form-label">Color de Cristal</label>
+                                <input type="text" name="colorCristalCerca" class="form-control"
+                                    value="{{ form.colorCristalCerca.value|default:'' }}">
+                            </div>
+                            <div class="ml-3" style="max-width:10%;" class="form-group">
+                                <label for="valorCristalesCerca" class="form-label">Valor de Cristal</label>
+                                <input type="text" name="valorCristalesCerca" class="form-control"
+                                    value="{{ form.valorCristalesCerca.value|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 ml-1 form-group">
+                                <label for="marcoLejos" class="form-label">Tipo de Marco</label>
+                                <input type="text" name="marcoLejos" class="form-control"
+                                    value="{{ form.marcoLejos.value|default:'' }}">
+                            </div>
+                            <div class="ml-3" style="max-width:10%;" class="form-group">
+                                <label for="valorMarcoLejos" class="form-label">Valor Marco</label>
+                                <input type="text" name="valorMarcoLejos" class="form-control"
+                                    value="{{ form.valorMarcoLejos.value|default:'' }}">
+                            </div>
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <label for="marcoCerca" class="form-label">Tipo de Marco</label>
+                                <input type="text" name="marcoCerca" class="form-control"
+                                    value="{{ form.marcoCerca.value|default:'' }}">
+                            </div>
+                            <div class="ml-3" style="max-width:10%;" class="form-group">
+                                <label for="valorMarcoCerca" class="form-label">Valor Marco</label>
+                                <input type="text" name="valorMarcoCerca" class="form-control"
+                                    value="{{ form.valorMarcoCerca.value|default:'' }}">
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-3 ml-1 form-group">
+                                <label for="laboratorioLejos" class="form-label">Laboratorio</label>
+                                <input type="text" name="laboratorioLejos" class="form-control"
+                                    value="{{ form.laboratorioLejos.value|default:'' }}">
+                            </div>
+
+                            <div class="col-md-3">
+                            </div>
+                            <div class="col-md-3 ml-4 form-group">
+                                <label for="laboratorioCerca" class="form-label">Laboratorio</label>
+                                <input type="text" name="laboratorioCerca" class="form-control"
+                                    value="{{ form.laboratorioCerca.value|default:'' }}">
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 90%; border: 1px solid #5eb9a4;">
+                            </div>
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-3 form-group">
+                                <label for="tipoPago" class="form-label">Tipo de Pago</label>
+                                <input type="text" name="tipoPago" class="form-control"
+                                    value="{{ form.tipoPago.value|default:'' }}">
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <label for="numeroVoucherOrdenTrabajo">Número de Voucher</label>
+                                <input type="text" name="numeroVoucherOrdenTrabajo" class="form-control"
+                                    value="{{ form.numeroVoucherOrdenTrabajo.value|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 form-group">
+                                <label for="observacionOrdenTrabajo">Observaciones Orden de Trabajo</label>
+                                <input type="text" name="observacionOrdenTrabajo" class="form-control"
+                                    value=" {{ form.observacionOrdenTrabajo.value|default:''}}">
+                            </div>
+                        </div>
+
+                        <!-- {{ form.fechaOrdenTrabajo.as_hidden }} -->
+                        <!-- {{ form.rutAtendedor.as_hidden }}
+                            {{ form.rutTecnico.as_hidden }}
+                            {{ form.rutAdministrador.as_hidden }} -->
+
+                        {% endif %}
+
+
+                        <div class="mt-3 mb-3">
+                            <a href="{% url 'ordenTrabajo_list' %}" class="btn btn-secondary mr-3">Cancelar</a>
+                            <button class="btn btn-success">Guardar Orden de Trabajo</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- </div> -->
+    </div>
+</div>
+
+{% endblock content %}

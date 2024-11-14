@@ -1,7 +1,5 @@
 {% extends 'optica/base.html' %}
 {% load static %}
-
-
 {% block content%}
 
 
@@ -17,7 +15,6 @@
 </div>
 {% endfor %}
 {% endif %}
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -47,8 +44,6 @@
             </div>
         </div>
     </section>
-
-
 
     <div class="mt-0">
         <div class="container-fluid w-100">
@@ -89,7 +84,7 @@
                         <tr>
                             <th scope="col">Id</th>
                             <th scope="col">RUN</th>
-                            <th scope="col">Nombre</th>
+                            <th scope="col">Nombre Cliente</th>
                             <th scope="col">Numero de Receta</th>
                             <th scope="col">Fecha Receta</th>
 
@@ -101,9 +96,6 @@
                         </tr>
                     </thead>
                     <tbody>
-
-
-
 
                         {% for receta in object_list %}
                         <tr>
@@ -150,54 +142,68 @@
                                 </div>
                             </div>
 
-
-                            <!-- Modal de Bootstrap para mostrar la imagen en tamaño completo -->
-                            <!-- <div class="modal fade" id="imagenModal-{{ receta.idReceta }}" tabindex="-1"
-                                aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLabel">Detalle de la Imagen</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body text-center">
-                                            {% if receta.imagenReceta %}
-                                            <img src="{{ receta.imagenReceta.url }}" alt="Imagen de receta"
-                                                style="max-width: 90%; height: auto;">
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> -->
                             <td>
                                 <div class="btn-group btn-group-sm">
                                     <button type="button" class="btn btn-info" data-bs-toggle="modal"
                                         data-bs-target="#recetaModal{{ receta.idReceta }}">
-                                        <i class="bi bi-eye"></i>
+                                        <i class="bi bi-eye"></i><!-- Icono de OJO para ver detalle -->
                                     </button>
 
                                     <a href="{% url 'receta_edit' receta.pk %}" class="btn btn-primary">
                                         <i class="bi bi-pencil"></i> <!-- Icono de lápiz para editar -->
                                     </a>
-                                    <a href="{% url 'receta_delete' receta.pk %}" class="btn btn-danger">
+
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                        data-bs-target="#eliminarRecetaModal{{ receta.idReceta }}">
                                         <i class="bi bi-trash"></i> <!-- Icono de basura para eliminar -->
-                                    </a>
+                                    </button>
+
+
                                 </div>
+                                <!-- --MODAL PARA ELIMINAR ORDEN DE TRABAJO -->
+                                <a data-bs-toggle="modal" data-bs-target="#eliminarRecetaModal{{ receta.idReceta }}">
+
+                                    <div class="modal fade" id="eliminarRecetaModal{{ receta.idReceta  }}" tabindex="-1"
+                                        aria-labelledby="eliminarRecetaModal{{ receta.idReceta  }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title font-weight-bold"
+                                                        id="eliminarRecetaModalLabel{{ receta.idReceta  }}">
+                                                        Eliminar Receta</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <span class="font-weight-bold text-center">
+                                                        <h5>
+                                                            ¿Está seguro de eliminar la Receta
+                                                            <br>Número {{receta.numeroReceta|default:''}}?
+                                                        </h5>
+                                                    </span>
+                                                    <form method="post" class="mt-3 text-center"
+                                                        action="{% url 'receta_delete' receta.idReceta %}">
+                                                        {% csrf_token %}
+                                                        <a href="{% url 'receta_list' %}"
+                                                            class="btn btn-secondary me-1">Cancelar</a>
+
+
+                                                        <button type="submit" class="btn btn-danger"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#eliminarRecetaModal{{ receta.idReceta }}">
+                                                            Eliminar
+                                                        </button>
+                                                    </form>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
                             </td>
                         </tr>
 
-
-
-
-
-
-
-
-
-
-
-
+                        <!-- --MODAL PARA MOSTRAR EL DETALLE -->
                         <div class="modal-condensed">
                             <div class="modal fade" id="recetaModal{{ receta.idReceta }}" tabindex="-1"
                                 aria-labelledby="recetaModalLabel{{ receta.idReceta }}" aria-hidden="true">
@@ -471,13 +477,9 @@
                                 </div>
                             </div>
                         </div>
-
-
                         {% endfor %}
                     </tbody>
                 </table>
-
-
             </div>
         </div>
 
@@ -545,12 +547,8 @@
                     {% endif %}
                 </ul>
             </nav>
-
         </section>
-
-
-
     </div>
-
 </div>
+
 {% endblock content %}

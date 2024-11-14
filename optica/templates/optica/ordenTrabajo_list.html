@@ -1,7 +1,5 @@
 {% extends 'optica/base.html' %}
 {% load static %}
-
-
 {% block content%}
 
 
@@ -17,7 +15,6 @@
 </div>
 {% endfor %}
 {% endif %}
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -87,14 +84,15 @@
                 <table class="table table-condensed table-striped mb-0">
                     <thead>
                         <tr>
+                            <th scope="col">ID Ord.Trab.</th>
                             <th scope="col">Numero Orden T.</th>
                             <th scope="col">RUN</th>
-                            <th scope="col">Nombre</th>
+                            <th scope="col">Nombre Cliente</th>
                             <th scope="col">Fecha Orden T.</th>
                             <th scope="col">Fecha entrega</th>
                             <th scope="col">Valor Total </th>
                             <th scope="col">Observaciones</th>
-                            <th scope="col"></th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -102,48 +100,101 @@
 
                         {% for ordenTrabajo in object_list %}
                         <tr>
+                            <td>{{ ordenTrabajo.idOrdenTrabajo }}</td>
                             <td>{{ ordenTrabajo.numeroOrdenTrabajo }}</td>
-                            <td>{{ receta.rutCliente }}-{{ receta.dvRutCliente }}</td>
-                            <td class="text-uppercase">{{ receta.nombreCliente }} {{ receta.apPaternoCliente }}
-                                {{ receta.apMaternoCliente |default:'' }}</td>
-                            <td>{{ ordenTrabajo.fechaOrdenTrabajo }}</td>
-                            <td>{{ ordenTrabajo.fechaEntregaOrdenTrabajo }}</td>
-                            <td>{{ ordenTrabajo.TotalOrdenTrabajo }}</td>
+                            <td>{{ ordenTrabajo.idReceta.rutCliente }}-{{ ordenTrabajo.idReceta.dvRutCliente }}</td>
+                            <td class="text-uppercase">{{ ordenTrabajo.idReceta.nombreCliente }}
+                                {{ ordenTrabajo.idReceta.apPaternoCliente }}
+                                {{ ordenTrabajo.idRreceta.apMaternoCliente |default:'' }}</td>
+                            <td>{{ ordenTrabajo.fechaOrdenTrabajo |date:'d/m/Y' |default:'' }}</td>
+                            <td>{{ ordenTrabajo.fechaEntregaOrdenTrabajo |date:'d/m/Y' |default:'' }}</td>
+                            <td>{{ ordenTrabajo.totalOrdenTrabajo |default:'' }}</td>
                             <td>{{ ordenTrabajo.observacionOrdenTrabajo |default:'' }}</td>
 
                             <td>
                                 <div class="btn-group btn-group-sm">
                                     <button type="button" class="btn btn-info" data-bs-toggle="modal"
                                         data-bs-target="#ordenTrabajoModal{{ ordenTrabajo.idOrdenTrabajo }}">
-                                        <i class="bi bi-eye"></i>
+                                        <i class="bi bi-eye"></i> <!-- Icono de OJO para ver detalle -->
                                     </button>
 
                                     <a href="{% url 'ordenTrabajo_edit' ordenTrabajo.pk %}" class="btn btn-primary">
                                         <i class="bi bi-pencil"></i> <!-- Icono de lápiz para editar -->
                                     </a>
-                                    <a href="{% url 'ordenTrabajo_delete' ordenTrabajo.pk %}" class="btn btn-danger">
+
+
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                        data-bs-target="#eliminarOrdenTrabajoModal{{ ordenTrabajo.idOrdenTrabajo }}">
                                         <i class="bi bi-trash"></i> <!-- Icono de basura para eliminar -->
-                                    </a>
+                                    </button>
                                 </div>
+                                <!-- --MODAL PARA ELIMINAR ORDEN DE TRABAJO -->
+                                <a data-bs-toggle="modal"
+                                    data-bs-target="#eliminarOrdenTrabajoModal{{ ordenTrabajo.idOrdenTrabajo }}">
+
+                                    <div class="modal fade"
+                                        id="eliminarOrdenTrabajoModal{{ ordenTrabajo.idOrdenTrabajo }}" tabindex="-1"
+                                        aria-labelledby="eliminarOrdenTrabajoModalLabel{{ ordenTrabajo.idOrdenTrabajo }}"
+                                        aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title font-weight-bold"
+                                                        id="eliminarOrdenTrabajoModalLabel{{ ordenTrabajo.idOrdenTrabajo }}">
+                                                        Eliminar
+                                                        Orden de Trabajo</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <span class="font-weight-bold text-center">
+                                                        <h5>
+                                                            ¿Está seguro de eliminar la Orden de Trabajo <br>Número
+                                                            {{ordenTrabajo.numeroOrdenTrabajo|default:''}}?</h5>
+                                                    </span>
+                                                    <form method="post" class="mt-3 text-center"
+                                                        action="{% url 'ordenTrabajo_delete' ordenTrabajo.idOrdenTrabajo %}">
+                                                        {% csrf_token %}
+                                                        <a href="{% url 'ordenTrabajo_list' %}"
+                                                            class="btn btn-secondary me-1">Cancelar</a>
+
+
+                                                        <button type="submit" class="btn btn-danger"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#eliminarOrdenTrabajoModal{{ ordenTrabajo.idOrdenTrabajo }}">
+                                                            Eliminar
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+
                             </td>
                         </tr>
 
-
+                        <!-- --MODAL PARA MOSTRAR EL DETALLE -->
 
                         <div class="modal-condensed">
                             <div class="modal fade" id="ordenTrabajoModal{{ ordenTrabajo.idOrdenTrabajo }}"
                                 tabindex="-1" aria-labelledby="ordenTrabajoModalLabel{{ ordenTrabajo.idOrdenTrabajo }}"
                                 aria-hidden="true">
 
-                                <div class="modal-dialog" style=" max-width: 40%;">
+                                <div class="modal-dialog" style=" max-width: 50%;">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title" style="font-weight: bold;"
                                                 id="recetaModalLabel{{ ordenTrabajo.idOrdenTrabajo}} ">
-                                                Detalle de la Orden de Trabajo - Número {{
-                                                ordenTrabajo.numeroOrdenTrabajo |default:'' }}
+                                                Detalle de la Orden de Trabajo - Número
+                                                {{ ordenTrabajo.numeroOrdenTrabajo |default:'' }}
                                             </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+
+                                            <p><span class="font-weight-bold mt-4" id="texto-modal">Creada el:</span>
+                                                {{ ordenTrabajo.fechaOrdenTrabajo | date:'d/m/Y'|default:'' }}
+                                            </p>
+
+                                            <button type="button" class="btn-info" data-bs-dismiss="modal"
                                                 aria-label="Close"></button>
                                         </div>
 
@@ -152,27 +203,29 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">RUN:</span>
-                                                        {{ receta.rutCliente }}-{{ receta.dvRutCliente }}
+                                                        {{ ordenTrabajo.idReceta.rutCliente }}-
+                                                        {{ ordenTrabajo.idReceta.dvRutCliente }}
                                                     </p>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">Cliente:</span>
-                                                        <span id="letras-modal">{{ receta.nombreCliente |upper }}
-                                                            {{ receta.apPaternoCliente |upper }}
-                                                            {{ receta.apMaternoCliente|default:'' |upper }}</span>
+                                                        <span id="letras-modal">
+                                                            {{ ordenTrabajo.idReceta.nombreCliente | upper }}
+                                                            {{ ordenTrabajo.idReceta.apPaternoCliente | upper }}
+                                                            {{ ordenTrabajo.idReceta.apMaternoCliente|default:''|upper}}
+                                                        </span>
                                                     </p>
                                                 </div>
                                             </div>
 
-
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">Celular:</span>
-                                                        {{ receta.celularCliente |default:'' }}</p>
+                                                        {{ ordenTrabajo.idReceta.celularCliente |default:'' }}</p>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">Teléfono:</span>
-                                                        {{ receta.telefonoCliente |default:'' }}</p>
+                                                        {{ ordenTrabajo.idReceta.telefonoCliente |default:'' }}</p>
                                                 </div>
                                             </div>
 
@@ -181,12 +234,9 @@
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">Número de
                                                             Receta:</span>
-                                                        {{ receta.numeroReceta |default:'' }}</p>
+                                                        {{ ordenTrabajo.idReceta.numeroReceta |default:'' }}</p>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <p><span class="font-weight-bold" id="texto-modal">Fecha:</span>
-                                                        {{ receta.fechaReceta | date:'d/m/Y' |default:'' }}</p>
-                                                </div>
+
                                             </div>
 
                                             <div class="row">
@@ -234,20 +284,20 @@
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.lejosOdEsfera |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.lejosOdEsfera |default:'' }}</p>
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.lejosOdCilindro |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.lejosOdCilindro |default:'' }}</p>
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.lejosOdEje |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.lejosOdEje |default:'' }}</p>
                                                 </div>
 
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.dpLejos |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.dpLejos |default:'' }}</p>
                                                 </div>
                                             </div>
 
@@ -258,15 +308,15 @@
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.lejosOiEsfera |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.lejosOiEsfera |default:'' }}</p>
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.lejosOiCilindro |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.lejosOiCilindro |default:'' }}</p>
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.lejosOiEje |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.lejosOiEje |default:'' }}</p>
                                                 </div>
 
 
@@ -319,20 +369,20 @@
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.cercaOdEsfera |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.cercaOdEsfera |default:'' }}</p>
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.cercaOdCilindro |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.cercaOdCilindro |default:'' }}</p>
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.cercaOdEje |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.cercaOdEje |default:'' }}</p>
                                                 </div>
 
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.dpCerca |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.dpCerca |default:'' }}</p>
                                                 </div>
                                             </div>
 
@@ -343,15 +393,15 @@
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.cercaOiEsfera |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.cercaOiEsfera |default:'' }}</p>
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.cercaOiCilindro |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.cercaOiCilindro |default:'' }}</p>
                                                 </div>
 
                                                 <div class="col" style="width: 22%;">
-                                                    <p>{{ receta.cercaOiEje |default:'' }}</p>
+                                                    <p>{{ ordenTrabajo.idReceta.cercaOiEje |default:'' }}</p>
                                                 </div>
 
 
@@ -371,7 +421,7 @@
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">Tipo de
                                                             lente:</span>
-                                                        {{ receta.tipoLente|default:""|upper }}</p>
+                                                        {{ ordenTrabajo.idReceta.tipoLente|default:""|upper }}</p>
                                                 </div>
                                             </div>
 
@@ -380,12 +430,13 @@
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold"
                                                             id="texto-modal">Institución:</span>
-                                                        {{ receta.institucion|default:""|upper }}</p>
+                                                        {{ ordenTrabajo.idReceta.institucion|default:""|upper }}</p>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">
                                                             Doctor(a) Oftalmología:</span>
-                                                        {{ receta.doctorOftalmologo |default:""|upper }}</p>
+                                                        {{ ordenTrabajo.idReceta.doctorOftalmologo |default:""|upper }}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <!-- Observaciones pueden ir en una sola fila ocupando ambas columnas -->
@@ -393,7 +444,8 @@
                                                 <div class="col-md-12">
                                                     <p><span class="font-weight-bold"
                                                             id="texto-modal">Observaciones:</span>
-                                                        {{ receta.observacionReceta |default:""|upper }}</p>
+                                                        {{ ordenTrabajo.idReceta.observacionReceta |default:""|upper }}
+                                                    </p>
                                                 </div>
                                             </div>
 
@@ -406,21 +458,14 @@
                                 </div>
                             </div>
                         </div>
-
-
                         {% endfor %}
                     </tbody>
                 </table>
-
-
             </div>
         </div>
 
-
         <div class="text-success text-left mt-3 ml-5">
             {{ page_obj.paginator.count }} Resultado{{ page_obj.paginator.count|pluralize }}
-
-
         </div>
 
         <div class="d-flex justify-content-center">
@@ -434,7 +479,8 @@
                 <ul class="pagination justify-content-center">
                     {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="{% url 'receta_list' %}?page={{ page_obj.previous_page_number }}"
+                        <a class="page-link"
+                            href="{% url 'ordenTrabajo_list' %}?page={{ page_obj.previous_page_number }}"
                             aria-label="Anterior">
                             <span aria-hidden="true">
                                 Anterior </span>
@@ -449,12 +495,9 @@
                     </li>
                     {% endif %}
 
-
-
-
                     {% for page in page_obj.adjusted_elided_pages %}
                     <li class="page-item {% if page_obj.number == page %}active{% endif %}">
-                        <a class="page-link" href="{% url 'receta_list' %}?page={{ page }}">
+                        <a class="page-link" href="{% url 'ordenTrabajo_list' %}?page={{ page }}">
                             {{ page }}
                         </a>
                     </li>
@@ -462,7 +505,7 @@
 
                     {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="{% url 'receta_list' %}?page={{ page_obj.next_page_number }}"
+                        <a class="page-link" href="{% url 'ordenTrabajo_list' %}?page={{ page_obj.next_page_number }}"
                             aria-label="Siguiente">
                             <span aria-hidden="true">
                                 Siguiente
@@ -480,12 +523,8 @@
                     {% endif %}
                 </ul>
             </nav>
-
         </section>
-
-
-
     </div>
-
 </div>
+
 {% endblock content %}

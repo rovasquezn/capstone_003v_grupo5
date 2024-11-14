@@ -1,7 +1,9 @@
 # forms.py
 from django import forms
+from django.db import models
 from .models import Receta, OrdenTrabajo 
 from crispy_forms.helper import FormHelper
+
 
 class RecetaForm(forms.ModelForm):
     class Meta:
@@ -43,43 +45,73 @@ class RecetaForm(forms.ModelForm):
 class OrdenTrabajoForm(forms.ModelForm):
     class Meta:
         model = OrdenTrabajo  # Asegúrate de vincular el formulario al modelo `Receta`
-        fields = '__all__' 
-        
+        fields = ['idReceta',
+        # 'rutAtendedor',
+        # 'rutTecnico',
+        # 'rutAdministrador',
+        'idOrdenTrabajo',
+        'numeroOrdenTrabajo',
+        'fechaEntregaOrdenTrabajo',
+        'horaEntregaOrdenTrabajo',
+        'laboratorioLejos',
+        'gradoLejosOd',
+        'gradoLejosOi',
+        'prismaLejosOd',
+        'prismaLejosOi',
+        'adicionLejosOd',
+        'adicionLejosOi',
+        'tipoCristalLejos',
+        'colorCristalLejos',
+        'marcoLejos',
+        'valorMarcoLejos',
+        'valorCristalesLejos',
+        'totalLejos',
+        'altura',
+        'laboratorioCerca',
+        'gradoCercaOd',
+        'gradoCercaOi',
+        'prismaCercaOd',
+        'prismaCercaOi',
+        'adicionCercaOd',
+        'adicionCercaOi',
+        'tipoCristalCerca',
+        'colorCristalCerca',
+        'marcoCerca',
+        'valorMarcoCerca',
+        'valorCristalesCerca',
+        'totalCerca',
+        'totalOrdenTrabajo',
+        'tipoPago',
+        'numeroVoucherOrdenTrabajo',
+        'observacionOrdenTrabajo']
+             
+             
+
     def __init__(self, *args, **kwargs):
-        super(OrdenTrabajo, self).__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_class = 'form-control-sm'
-  
-        # Hacer los campos readonly
-        self.fields['idReceta'].widget = forms.TextInput()
-        self.fields['rutCliente'].widget.attrs['readonly'] = True
-        self.fields['dvRutCliente'].widget.attrs['readonly'] = True
-        self.fields['nombreCliente'].widget.attrs['readonly'] = True
-        self.fields['apPaternoCliente'].widget.attrs['readonly'] = True
-        self.fields['apMaternoCliente'].widget.attrs['readonly'] = True
-        self.fields['celularCliente'].widget.attrs['readonly'] = True
-        self.fields['telefonoCliente'].widget.attrs['readonly'] = True       
-        self.fields['numeroReceta'].widget.attrs['readonly'] = True
-        self.fields['fechaReceta'].widget.attrs['readonly'] = True
-        self.fields['lejosOdEsfera'].widget.attrs['readonly'] = True
-        self.fields['lejosOdCilindro'].widget.attrs['readonly'] = True
-        self.fields['lejosOdEje'].widget.attrs['readonly'] = True
-        self.fields['lejosOiEsfera'].widget.attrs['readonly'] = True
-        self.fields['lejosOiCilindro'].widget.attrs['readonly'] = True
-        self.fields['lejosOiEje'].widget.attrs['readonly'] = True
-        self.fields['dpLejos'].widget.attrs['readonly'] = True
-        self.fields['cercaOdEsfera'].widget.attrs['readonly'] = True
-        self.fields['cercaOdCilindro'].widget.attrs['readonly'] = True
-        self.fields['cercaOdEje'].widget.attrs['readonly'] = True
-        self.fields['cercaOiEsfera'].widget.attrs['readonly'] = True
-        self.fields['cercaOiCilindro'].widget.attrs['readonly'] = True
-        self.fields['cercaOiEje'].widget.attrs['readonly'] = True
-        self.fields['dpCerca'].widget.attrs['readonly'] = True
-        self.fields['tipoLente'].widget.attrs['readonly'] = True
-        self.fields['institucion'].widget.attrs['readonly'] = True
-        self.fields['doctorOftalmologo'].widget.attrs['readonly'] = True
-        # self.fields['imagenReceta'].widget.attrs['readonly'] = True
-        self.fields['observacionReceta'].widget.attrs['readonly'] = True
+        super(OrdenTrabajoForm, self).__init__(*args, **kwargs)
+        # Si deseas agregar alguna clase de CSS específica, puedes hacerlo directamente en el ciclo.
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control form-control-sm'    
+            field.widget.attrs.update({'class': 'form-control form-control-sm'})  # Clases para diseño 
+            
+            self.fields['idReceta'].widget = forms.TextInput()
+            
+            
+            
+            
+            
+        
+        # # Configura el campo de fecha
+        #     self.fields['fechaEntregaOrdenTrabajo'].widget = forms.DateInput(
+        #         attrs={
+        #             'class': 'form-control', 
+        #             'type': 'date'
+        #         }   
+        #     )
+       
+       
+        # Hacer los campos readonly 
+        self.fields['numeroOrdenTrabajo'].widget.attrs['readonly'] = True 
         self.fields['totalLejos'].widget.attrs['readonly'] = True
         self.fields['totalCerca'].widget.attrs['readonly'] = True
         self.fields['totalOrdenTrabajo'].widget.attrs['readonly'] = True
