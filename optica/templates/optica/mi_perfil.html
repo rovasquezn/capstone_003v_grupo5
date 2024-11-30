@@ -138,7 +138,7 @@
                         <div class="alert mt-4 p-3 {% if password_form.errors %}alert-danger{% else %}alert-success{% endif %}">
                             <ul class="mb-0">
                                 {% for message in messages %}
-                                #<li>{{ message }}</li>
+                                <li>{{ message }}</li>
                                 {% endfor %}
                                 {% for error in password_form.non_field_errors %}
                                 <li>{{ error }}</li>
