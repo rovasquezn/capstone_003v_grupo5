@@ -73,12 +73,20 @@ class CustomUserChangeForm(UserChangeForm):
         widget=forms.Select(attrs={'class': 'form-control'}),
         required=True
     )
-    username = forms.CharField(label='Nombre de Usuario', widget=forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}))
+    username = forms.CharField(label='Nombre de Usuario', widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}))
     
     class Meta:
         model = CustomUser
         fields = ['first_name', 'ap_paterno', 'ap_materno', 'email', 'rut', 'dv', 'celular', 'user_type', 'is_active', 'username']
-          
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'password' in self.fields:
+            del self.fields['password']
+        if 'password1' in self.fields:
+            del self.fields['password1']
+        if 'password2' in self.fields:
+            del self.fields['password2']
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     class Meta:

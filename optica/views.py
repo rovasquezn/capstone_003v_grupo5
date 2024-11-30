@@ -584,7 +584,7 @@ class UsuarioCreateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageM
         return context
 
     def form_valid(self, form):
-        form.instance.username = f"{form.cleaned_data['first_name'].lower()}.{form.cleaned_data['ap_paterno'].lower()}.{form.cleaned_data['ap_materno'].lower()}"
+        form.instance.username = form.cleaned_data['username']
         self.object = form.save()
         password = form.cleaned_data.get('password1')
         send_user_creation_email(self.object, password)
@@ -597,12 +597,15 @@ class UsuarioCreateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageM
     def test_func(self):
         return self.request.user.is_authenticated and self.request.user.user_type == 1  # Solo Administrador
 
-class UsuarioUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
+class UsuarioUpdateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, generic.UpdateView):
     model = CustomUser
     form_class = CustomUserChangeForm
     template_name = 'optica/usuario_form.html'
     success_url = reverse_lazy('usuario_list')
-    success_message = "Usuario actualizado con éxito."
+    success_message = "Usuario {username} actualizado con éxito."
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message.format(username=self.object.username)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -610,6 +613,9 @@ class UsuarioUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateV
         context['is_edit'] = True
         return context
     
+    def form_valid(self, form):
+        return super().form_valid(form)
+
     def form_invalid(self, form):
         messages.error(self.request, 'Por favor, corrija los errores en el formulario.')
         return self.render_to_response(self.get_context_data(form=form))
