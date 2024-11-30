@@ -1,108 +1,114 @@
-from rest_framework import viewsets
-# from .serializer import ClienteSerializer
-# from .serializer import RecetaSerializer
-# from .serializer import OrdenTrabajoSerializer
-
-# from .serializer import AdministradorSerializer
-from .models import Cliente, Receta, OrdenTrabajo, Administrador
-
+from django import forms
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash, get_user_model
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetConfirmView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.urls import reverse_lazy
+from django.views import generic
+from django.views.generic import ListView
+from django.db.models import Q, Max, QuerySet
+from typing import Any
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-
-from typing import Any
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
-
-from django.views import generic
-from django.db.models import QuerySet
-from django.db.models import Q
-
-from .forms import RecetaForm 
-from .forms import OrdenTrabajoForm 
-
-from django import forms
-from django.views import View
-
-import os
-from django.http import FileResponse
-from django.conf import settings
+from .forms import (
+    AdministradorChangeForm, AdministradorCreationForm, AtendedorChangeForm, AtendedorCreationForm, CustomUserCreationForm, CustomUserChangeForm, 
+    CustomPasswordChangeForm, RecetaForm, OrdenTrabajoForm, TecnicoChangeForm, TecnicoCreationForm, UserProfileForm
+)
+from .models import Cliente, Receta, OrdenTrabajo, Administrador, Atendedor, Tecnico, CustomUser
 from datetime import datetime
-from django.db.models import Max
-
-# from .serializer import AtendedorSerializer
-# from .serializer import TecnicoSerializer
-# from .serializer import RecetaSerializer
-# from .serializer import AbonoSerializer
-# from .serializer import OrdenTrabajoSerializer
-# from .serializer import CertificadoSerializer
-# from .serializer import AdministradorSerializer
-
-# from .models import Atendedor
-# from .models import Tecnico
-# from .models import Receta
-# from .models import Abono
-# from .models import OrdenTrabajo
-# from .models import Certificado
-# from .models import Administrador
-
-# Create your views here.
-# class ClienteView(viewsets.ModelViewSet):
-#     serializer_class = ClienteSerializer
-#     queryset = Cliente.objects.all()
+from optica import models
+from django.http import JsonResponse
+from .signals import send_password_reset_success_email, send_user_creation_email
 
 
-# class AtendedorView(viewsets.ModelViewSet):
-#     serializer_class = AtendedorSerializer
-#     queryset = Atendedor.objects.all()
+User = get_user_model()
 
 
-# class TecnicoView(viewsets.ModelViewSet):
-#     serializer_class = TecnicoSerializer
-#     queryset = Tecnico.objects.all()
+# Funciones auxiliares
+def get_profile_and_form(user):
+    """Devuelve el perfil asociado al usuario y el formulario correspondiente."""
+    if user.user_type == 1:
+        return getattr(user, 'administrador', None), AdministradorChangeForm
+    elif user.user_type == 2:
+        return getattr(user, 'atendedor', None), AtendedorChangeForm
+    elif user.user_type == 3:
+        return getattr(user, 'tecnico', None), TecnicoChangeForm
+    return None, None
 
-
-# class RecetaView(viewsets.ModelViewSet):
-#     serializer_class = RecetaSerializer
-#     queryset = Receta.objects.all()
-
-
-# class AbonoView(viewsets.ModelViewSet):
-#     serializer_class = AbonoSerializer
-#     queryset = Abono.objects.all()
-
-
-# class OrdenTrabajoView(viewsets.ModelViewSet):
-#     serializer_class = OrdenTrabajoSerializer
-#     queryset = OrdenTrabajo.objects.all()
-
-
-# class CertificadoView(viewsets.ModelViewSet):
-#     serializer_class = CertificadoSerializer
-#     queryset = Certificado.objects.all()
-
-
-# class AdministradorView(viewsets.ModelViewSet):
-#     serializer_class = AdministradorSerializer
-#     queryset = Administrador.objects.all()
-
-
-
-
-
+@login_required
 def index(request):
-    # Construir la ruta completa del archivo index.html en la raíz
-    file_path = os.path.join(settings.BASE_DIR, 'index.html')
+    user = request.user
+    last_name_parts = user.last_name.split()
+    apellido_paterno = last_name_parts[0] if last_name_parts else ''
+    nombre_completo = f"{user.first_name} {apellido_paterno}"  # Solo el apellido paterno
+    context = {
+        'nombre_completo': nombre_completo,
+    }
+    return render(request, 'optica/index.html', context)
+
+@login_required
+def mi_perfil(request):
+    user = request.user
+    if request.method == 'POST':
+        password_form = PasswordChangeForm(user=request.user, data=request.POST)
+        if password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Tu contraseña ha sido cambiada con éxito.')
+            return redirect('mi_perfil')
+        else:
+            messages.error(request, 'Por favor, corrige los errores a continuación.')
+    else:
+        password_form = PasswordChangeForm(user=request.user)
     
-    # Devolver el archivo como respuesta
-    return FileResponse(open(file_path, 'rb'), content_type='text/html')
+    context = {
+        'first_name': user.first_name,
+        'ap_paterno': user.ap_paterno,
+        'ap_materno': user.ap_materno,
+        'rut': f"{user.rut}-{user.dv}",
+        'email': user.email,
+        'celular': user.celular,
+        'username': user.username,
+        'user_type': user.get_user_type_display(),
+        'password_form': password_form,
+    }
+    return render(request, 'optica/mi_perfil.html', context)
 
+class CustomLoginView(LoginView):
+    template_name = 'optica/login.html'
 
-# Create your views here.
-class ListarClienteView(generic.ListView):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('index')  # Redirige a la página de inicio si el usuario ya está autenticado
+        return super().dispatch(request, *args, **kwargs)
+
+#Restablecer contraseña
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'optica/password_reset.html'
+    email_template_name = 'optica/password_reset_email.html'
+    subject_template_name = 'optica/password_reset_subject.txt'  # Añadir esta línea
+    html_email_template_name = 'optica/password_reset_email.html'  # Añadir esta línea
+    success_url = reverse_lazy('password_reset_done')
+
+#Envio de mail confirmando restablecimiento de contraseña
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    success_url = reverse_lazy('password_reset_complete')
+
+    def form_valid(self, form):
+        user = form.save()
+        send_password_reset_success_email(user)
+        return super().form_valid(form)
+
+# Clientes
+class ListarClienteView(LoginRequiredMixin, generic.ListView):
     model = Cliente
     paginate_by = 8
     ordering = ['-creacionCliente']  # Ordena por el campo 'creacionCliente' en orden descendente
-
+    #Agregados por Derek para limitar vistas por tipo de suario
+    #template_name = 'optica/cliente_list.html'
+    #context_object_name = 'clientes'
     # def get_queryset(self) -> QuerySet[Any]:
     #     q = self.request.GET.get('q')
 
@@ -132,6 +138,9 @@ class ListarClienteView(generic.ListView):
         context = super().get_context_data(**kwargs)
         context['q'] = self.request.GET.get('q', '')  # Mantener el valor de la búsqueda en el contexto
         return context
+    
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.user_type in [1, 2, 3]  # Administrador, Atendedor y Técnico
 
 class CrearClienteView(SuccessMessageMixin, generic.CreateView):
     model = Cliente
@@ -146,6 +155,7 @@ class CrearClienteView(SuccessMessageMixin, generic.CreateView):
     'direccionCliente',)
     success_url = reverse_lazy('cliente_list')
     success_message = "El cliente se ha creado exitosamente."
+    
 
 
 class EditarClienteView(SuccessMessageMixin, generic.UpdateView):
@@ -165,9 +175,7 @@ class EliminarClienteView(SuccessMessageMixin, generic.DeleteView):
     success_url = reverse_lazy('cliente_list')
     success_message = "El cliente se ha eliminado exitosamente."
 
-
-#RECETAS
-
+# Recetas
 class ListarRecetaView(generic.ListView):
     model = Receta
     paginate_by = 8
@@ -300,10 +308,7 @@ class EliminarRecetaView(SuccessMessageMixin, generic.DeleteView):
     success_url = reverse_lazy('receta_list')
     success_message = "La receta se ha eliminado exitosamente."
 
-
-
-#ORDEN DE TRABAJO
-
+# Órdenes de Trabajo
 class ListarOrdenTrabajoView(generic.ListView):
     model = OrdenTrabajo
     paginate_by = 8
@@ -531,3 +536,98 @@ class EliminarOrdenTrabajoView(SuccessMessageMixin, generic.DeleteView):
     # template_name = 'ordenTrabajo_delete'
     success_url = reverse_lazy('ordenTrabajo_list')
     success_message = "La Orden de Trabajo se ha eliminado exitosamente."
+
+# Usuarios
+class UsuarioListView(LoginRequiredMixin, UserPassesTestMixin, generic.ListView):
+    model = CustomUser
+    template_name = 'optica/usuario_list.html'
+    context_object_name = 'usuarios'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('id')  # Ordenar por 'id' o cualquier otro campo relevante
+        query = self.request.GET.get('q')
+        if query:
+            user_type_map = {
+                'Administrador': 1,
+                'Atendedor': 2,
+                'Técnico': 3
+            }
+            user_type_value = user_type_map.get(query, None)
+            if user_type_value is not None:
+                queryset = queryset.filter(user_type=user_type_value)
+            else:
+                queryset = queryset.filter(
+                    Q(username__icontains=query) |
+                    Q(email__icontains=query) |
+                    Q(first_name__icontains=query) |
+                    Q(ap_paterno__icontains=query) |
+                    Q(ap_materno__icontains=query) |
+                    Q(rut__icontains=query)
+                )
+        return queryset
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.user_type in [1, 2, 3]  # Administrador y Atendedor
+
+class UsuarioCreateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, generic.CreateView):
+    model = CustomUser
+    form_class = CustomUserCreationForm
+    template_name = 'optica/usuario_form.html'
+    success_url = reverse_lazy('usuario_list')
+    success_message = "Usuario creado con éxito."
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Crear Usuario'
+        context['is_edit'] = False
+        return context
+
+    def form_valid(self, form):
+        form.instance.username = f"{form.cleaned_data['first_name'].lower()}.{form.cleaned_data['ap_paterno'].lower()}.{form.cleaned_data['ap_materno'].lower()}"
+        self.object = form.save()
+        password = form.cleaned_data.get('password1')
+        send_user_creation_email(self.object, password)
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Por favor, corrija los errores en el formulario.')
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.user_type == 1  # Solo Administrador
+
+class UsuarioUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
+    model = CustomUser
+    form_class = CustomUserChangeForm
+    template_name = 'optica/usuario_form.html'
+    success_url = reverse_lazy('usuario_list')
+    success_message = "Usuario actualizado con éxito."
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Editar Usuario'
+        context['is_edit'] = True
+        return context
+    
+    def form_invalid(self, form):
+        messages.error(self.request, 'Por favor, corrija los errores en el formulario.')
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.user_type == 1  # Solo Administrador
+
+class UsuarioDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteView):
+    model = CustomUser
+    template_name = 'optica/usuario_confirm_delete.html'
+    success_url = reverse_lazy('usuario_list')
+    success_message = "Usuario borrado con éxito."
+
+    #Nuevo
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super().delete(request, *args, **kwargs)
+
+    
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.user_type == 1  # Solo Administrador

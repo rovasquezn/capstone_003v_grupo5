@@ -1,0 +1,128 @@
+{% extends 'optica/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ form_title }}{% endblock %}
+
+{% block content %}
+<div id="content" class="bg-grey w-100">
+    <section class="bg-light py-3">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-9 col-md-8">
+                    <h1 class="font-weight-bold mb-0">{{ form_title }}</h1>
+                    <p class="lead text-muted">Complete la información del usuario</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="container mt-5">
+        <div class="row justify-content-center mt-4">
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                {% for field in form %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-group">
+                                            {{ field.label_tag|cut:":" }}
+                                            {{ field }}
+                                            {% if field.errors %}
+                                                <div class="invalid-feedback">
+                                                    {% for error in field.errors %}
+                                                        <p>{{ error }}</p>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="d-flex justify-content-center mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    {% if is_edit %}
+                                        Guardar cambios
+                                    {% else %}
+                                        Crear usuario
+                                    {% endif %}
+                                </button>
+                                <a href="{% url 'usuario_list' %}" class="btn btn-secondary ml-2">Cancelar</a>
+                            </div>
+                        </form>
+                        {% if form.errors %}
+                            <div class="alert alert-danger mt-3">
+                                <ul>
+                                    {% for field in form %}
+                                        {% for error in field.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstNameField = document.querySelector('#id_first_name');
+        const apPaternoField = document.querySelector('#id_ap_paterno');
+        const usernameField = document.querySelector('#id_username');
+        const runField = document.querySelector('#id_rut');
+        const dvField = document.querySelector('#id_dv');
+        const celularField = document.querySelector('#id_celular');
+
+        function generateUsername() {
+            const firstName = firstNameField.value.toLowerCase();
+            const apPaterno = apPaternoField.value.toLowerCase();
+            if (firstName && apPaterno) {
+                usernameField.value = `${firstName[0]}.${apPaterno}`;
+            }
+        }
+
+        function restrictInput(event, pattern) {
+            const input = event.target;
+            const value = input.value;
+            if (!pattern.test(value)) {
+                input.value = value.slice(0, -1);
+            }
+        }
+
+        firstNameField.addEventListener('input', generateUsername);
+        apPaternoField.addEventListener('input', generateUsername);
+
+        runField.addEventListener('input', function(event) {
+            restrictInput(event, /^\d{0,8}$/); // Solo números, máximo 8 dígitos
+        });
+
+        dvField.addEventListener('input', function(event) {
+            restrictInput(event, /^[0-9Kk]?$/); // Solo un número o la letra K
+        });
+
+        celularField.addEventListener('input', function(event) {
+            restrictInput(event, /^\d{0,9}$/); // Solo números, máximo 9 dígitos
+        });
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-group label {
+        font-weight: normal; /* No poner en negrita */
+    }
+    .form-control {
+        border-radius: 0.25rem; /* Asegurar que los cuadros de ingreso de texto coincidan con la apariencia de otros formularios */
+    }
+</style>
+{% endblock %}

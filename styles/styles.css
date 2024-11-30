@@ -1,14 +1,11 @@
 :root {
-    --primary: #618e19;
-    --light: #ffffff;
-    --grey: #efefef03;
+    --primary: #007bff;
+    --light: #f8f9fa;
+    --grey: #6c757d;
 }
 
 body {
-    overflow: hidden;
     font-family: 'Muli', sans-serif;
-    font-weight: 50;
-    color: var(--primary);
 }
 
 a:hover {
@@ -34,50 +31,17 @@ a:hover {
 
 #sidebar-container {
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
-  
-#sidebar-container .logo{
+
+#sidebar-container .logo {
     padding: 3rem 1rem;
-
-}
-  
-#sidebar-container .menu {
-    width: 16rem;
-    padding: 1rem;
-
-    font-weight: bold;
 }
 
-#content {
-    overflow-y: auto;
-    height: 100vh;
-    padding-bottom: 4rem;
+#content-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-.avatar {
-    max-width: 35px;
-}
-
-.btn-search {
-    right: 0;
-}
-
-.stat {
-    border-right: 1px solid var(--grey);
-}
-
-  
-@media (max-width: 780px) {
-    #sidebar-container {
-      display: none;
-    }
-    .stat {
-        border: 0;
-    }
-  }
-  
-
-  .scrollable-form {
-    max-height: 400px; /* Ajusta este valor según el tamaño que necesites */
-    overflow-y: auto;
-}

@@ -1,8 +1,45 @@
 import os
 from django.db import models
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('El email debe ser proporcionado')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('El superusuario debe tener is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('El superusuario debe tener is_superuser=True.')
+
+        return self.create_user(email, password, **extra_fields)
+
+class CustomUser(AbstractUser):
+    first_name = models.CharField(max_length=30)
+    ap_paterno = models.CharField(max_length=30)
+    ap_materno = models.CharField(max_length=30)
+    email = models.EmailField(unique=True)
+    rut = models.CharField(max_length=8)
+    dv = models.CharField(max_length=1)
+    celular = models.CharField(max_length=9)
+    user_type = models.PositiveSmallIntegerField(choices=[(1, 'Administrador'), (2, 'Atendedor'), (3, 'Técnico')])
+
+    def __str__(self):
+        return self.username
+
+    objects = CustomUserManager()
 
 class Cliente(models.Model):
-    rutCliente = models.IntegerField(primary_key=True, verbose_name="RUN Cliente") 
+    rutCliente = models.IntegerField(primary_key=True, verbose_name="RUN Cliente")
     dvRutCliente = models.CharField(max_length=1, verbose_name="Digito")
     nombreCliente = models.CharField(max_length=20, verbose_name="Nombre")
     apPaternoCliente = models.CharField(max_length=20, verbose_name="Apellido Paterno")
@@ -16,55 +53,50 @@ class Cliente(models.Model):
     def __str__(self):
         return f"{self.rutCliente}"
 
-class Atendedor(models.Model): 
-    rutAtendedor = models.IntegerField(primary_key=True, verbose_name="RUN Atendedor") 
-    dvRutAtendedor = models.CharField(max_length=1, verbose_name="Digito")
+
+class Atendedor(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+    rutAtendedor = models.CharField(max_length=12)
+    dvRutAtendedor = models.CharField(max_length=1)
     nombreAtendedor = models.CharField(max_length=20, verbose_name="Nombre")
     apPaternoAtendedor = models.CharField(max_length=20, verbose_name="Apellido Paterno")
     apMaternoAtendedor = models.CharField(max_length=20, verbose_name="Apellido Materno")
     celularAtendedor = models.IntegerField(null=True, blank=True, verbose_name="Celular")
-    emailAtendedor = models.EmailField(max_length=30, null=True, blank=True, verbose_name="Correo Electrónico")  
-    nombreUsuarioAtendedor = models.CharField(max_length=15, verbose_name="Nombre de Usuario") #Nombre de usuario
-    claveAtendedor = models.CharField(max_length=15, verbose_name="Clave") #Clave
+    emailAtendedor = models.EmailField(max_length=30, null=True, blank=True, verbose_name="Correo Electrónico")
 
     def __str__(self):
-        return f"{self.nombreAtendedor} {self.apPaternoAtendedor} {self.apMaternoAtendedor}"
+        return self.user.username
 
-class Tecnico(models.Model): 
-    rutTecnico = models.IntegerField(primary_key=True, verbose_name="RUN Técnico") 
+class Tecnico(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+    rutTecnico = models.IntegerField(verbose_name="RUN Técnico")
     dvRutTecnico = models.CharField(max_length=1, verbose_name="Digito")
     nombreTecnico = models.CharField(max_length=20, verbose_name="Nombre")
     apPaternoTecnico = models.CharField(max_length=20, verbose_name="Apellido Paterno")
     apMaternoTecnico = models.CharField(max_length=20, verbose_name="Apellido Materno")
     celularTecnico = models.IntegerField(null=True, blank=True, verbose_name="Celular")
-    emailTecnico = models.EmailField(max_length=30, null=True, blank=True, verbose_name="Correo Electrónico")  
-    nombreUsuarioTecnico = models.CharField(max_length=15, verbose_name="Nombre de Usuario") #Nombre de usuario
-    claveTecnico = models.CharField(max_length=15, verbose_name="Clave") #Clave
+    emailTecnico = models.EmailField(max_length=30, null=True, blank=True, verbose_name="Correo Electrónico")
 
     def __str__(self):
         return f"{self.nombreTecnico} {self.apPaternoTecnico} {self.apMaternoTecnico}"
 
-class Administrador(models.Model): 
-    rutAdministrador = models.IntegerField(primary_key=True, verbose_name="RUN Administrador") 
+class Administrador(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+    rutAdministrador = models.IntegerField(verbose_name="RUN Administrador")
     dvRutAdministrador = models.CharField(max_length=1, verbose_name="Digito")
     nombreAdministrador = models.CharField(max_length=20, verbose_name="Nombre")
     apPaternoAdministrador = models.CharField(max_length=20, verbose_name="Apellido Paterno")
     apMaternoAdministrador = models.CharField(max_length=20, verbose_name="Apellido Materno")
     celularAdministrador = models.IntegerField(null=True, blank=True, verbose_name="Celular")
-    emailAdministrador = models.EmailField(max_length=50, null=True, blank=True, verbose_name="Correo Electrónico")   
-    nombreUsuarioAdministrador = models.CharField(max_length=20, verbose_name="Nombre de Usuario") #Nombre de usuario
-    claveAdministrador = models.CharField(max_length=20, verbose_name="Clave") #Clave
+    emailAdministrador = models.EmailField(max_length=30, null=True, blank=True, verbose_name="Correo Electrónico")
 
     def __str__(self):
         return f"{self.nombreAdministrador} {self.apPaternoAdministrador} {self.apMaternoAdministrador}"
+
     
 class Receta(models.Model):
     idReceta = models.BigAutoField(primary_key=True, verbose_name="ID receta")
     rutCliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name="RUN Cliente")
-    rutAdministrador = models.ForeignKey(Administrador, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Administrador")
-    rutTecnico = models.ForeignKey(Tecnico, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Técnico")
-    rutAtendedor = models.ForeignKey(Atendedor, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Atendedor") 
-
     dvRutCliente = models.CharField(max_length=1, null=True, blank=True, verbose_name="Dígito")
     nombreCliente = models.CharField(max_length=20, null=True, blank=True, verbose_name="Nombre")
     apPaternoCliente = models.CharField(max_length=20, null=True, blank=True, verbose_name="Apellido Paterno")
@@ -137,9 +169,9 @@ class Receta(models.Model):
 class OrdenTrabajo(models.Model): 
     idReceta = models.ForeignKey(Receta, null=True, blank=True, on_delete=models.CASCADE, verbose_name="ID Receta")
     # rutCliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name="RUN Cliente") 
-    rutAtendedor = models.ForeignKey(Atendedor, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Atendedor") 
-    rutTecnico = models.ForeignKey(Tecnico, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Técnico")
-    rutAdministrador = models.ForeignKey(Administrador, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Administrador")
+    #rutAtendedor = models.ForeignKey(Atendedor, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Atendedor") 
+    #rutTecnico = models.ForeignKey(Tecnico, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Técnico")
+    #rutAdministrador = models.ForeignKey(Administrador, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Administrador")
     idOrdenTrabajo = models.BigAutoField(primary_key=True, verbose_name="ID Orden de Trabajo")
     numeroOrdenTrabajo = models.IntegerField(verbose_name="Número de Orden de Trabajo") 
     fechaOrdenTrabajo = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name="Fecha Orden de Trabajo")
@@ -209,9 +241,9 @@ class Abono(models.Model):
     idOrdenTrabajo = models.ForeignKey(OrdenTrabajo, on_delete=models.CASCADE, verbose_name="ID Orden de Trabajo")
     rutCliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name="RUN Cliente") 
    
-    rutAdministrador = models.ForeignKey(Administrador, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Administrador")
-    rutTecnico = models.ForeignKey(Tecnico, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Técnico")
-    rutAtendedor = models.ForeignKey(Atendedor, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Atendedor") 
+    #rutAdministrador = models.ForeignKey(Administrador, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Administrador")
+    #rutTecnico = models.ForeignKey(Tecnico, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Técnico")
+    #rutAtendedor = models.ForeignKey(Atendedor, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Atendedor") 
 
     fechaAbono = models.DateTimeField(auto_now_add=True, verbose_name="Fecha Abono")
     valorAbono = models.IntegerField(null=True, blank=True, verbose_name="Valor Abono")
@@ -230,14 +262,12 @@ class Certificado(models.Model):
     idOrdenTrabajo = models.ForeignKey(OrdenTrabajo, on_delete=models.CASCADE, verbose_name="ID Orden de Trabajo") 
     rutCliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, verbose_name="RUN Cliente") 
 
-    rutTecnico = models.ForeignKey(Tecnico, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Técnico") 
-    rutAdministrador = models.ForeignKey(Administrador, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Administrador")
-    rutAtendedor = models.ForeignKey(Atendedor, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Atendedor") 
+    #rutTecnico = models.ForeignKey(Tecnico, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Técnico") 
+    #rutAdministrador = models.ForeignKey(Administrador, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Administrador")
+    #rutAtendedor = models.ForeignKey(Atendedor, on_delete=models.CASCADE, null=True, blank=True, verbose_name="RUN Atendedor") 
 
     idReceta = models.ForeignKey(Receta, on_delete=models.CASCADE, verbose_name="ID Receta") 
     fechaCertificado = models.DateTimeField(auto_now_add=True, verbose_name="Fecha Certificado")
     
     def __str__(self):
         return f"{self.rutCliente} {self.fechaCertificado}"
-    
-    

@@ -1,0 +1,179 @@
+{% extends "optica/base.html" %}
+
+{% block content %}
+<!-- Page Content -->
+<div id="content" class="bg-grey w-100">
+
+    <section class="bg-light py-3">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-9 col-md-8">
+                    <h1 class="font-weight-bold mb-0">Panel Usuarios</h1>
+                    <p class="lead text-muted">Listado de usuarios registrados en el sistema</p>
+                </div>
+                <div class="col-lg-3 col-md-4 d-flex">
+                    {% if request.user.user_type == 1 %}
+                    <a href="{% url 'usuario_create' %}" class="btn btn-primary w-100 align-self-center">
+                        Crear nuevo Usuario</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="mt-0">
+        <div class="container-fluid w-100">
+            <div class="card border border-1 shadow rounded p-3 ">
+
+                {% if messages %}
+                    <div class="alert alert-success">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Buscar por -->
+                <form action="" method="get" style="max-width: 550px;">
+                    <div class="input-group">
+                        <input type="text" class="form-control"
+                            placeholder="Buscar por Nombre, Usuario, Email" name="q"
+                            value="{{ request.GET.q }}">
+                        <button class="btn btn-primary">
+                            Buscar Usuario
+                        </button>
+                    </div>
+                </form>
+
+                <br>
+
+                <!-- Tabla de Usuarios -->
+
+                <style>
+                    .table-condensed {
+                        font-size: 12px;
+                        /* Ajusta este valor según lo necesites */
+                    }
+
+                    .table-condensed th,
+                    .table-condensed td {
+                        padding-top: 5px;
+                        padding-bottom: 5px;
+                        /* Reduce el espacio entre celdas */
+                    }
+
+                    .table-condensed .text-center {
+                        text-align: center;
+                    }
+                </style>
+
+                <table class="table table-condensed table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Usuario</th>
+                            <th>Nombre de Usuario</th>
+                            <th>Email</th>
+                            <th>Nombre</th>
+                            <th>Apellido Paterno</th>
+                            <th>Apellido Materno</th>
+                            <th>RUN</th>
+                            <th>DV</th>
+                            <th class="text-center">Activo</th>
+                            {% if request.user.user_type == 1 %}
+                            <th>Acciones</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.get_user_type_display|upper }}</td>
+                            <td>{{ usuario.username|lower }}</td>
+                            <td>{{ usuario.email|upper }}</td>
+                            <td>{{ usuario.first_name|upper }}</td>
+                            <td>{{ usuario.ap_paterno|upper }}</td>
+                            <td>{{ usuario.ap_materno|upper }}</td>
+                            <td>{{ usuario.rut }}</td>
+                            <td>{{ usuario.dv|upper }}</td>
+                            <td class="text-center">
+                                {% if usuario.is_active %}
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                {% else %}
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                {% endif %}
+                            </td>
+                            {% if request.user.user_type == 1 %}
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'usuario_edit' usuario.id %}" class="btn btn-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'usuario_delete' usuario.id %}" class="btn btn-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                    
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="text-success text-left mt-3 ml-5">
+            {{ page_obj.paginator.count }} Resultado{{ page_obj.paginator.count|pluralize }}
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <small class="d-none d-sm-inline-block text-body">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </small>
+        </div>
+
+        <section>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                            <span aria-hidden="true">Anterior</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Anterior">
+                            <span aria-hidden="true">Anterior</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for page in page_obj.adjusted_elided_pages %}
+                    <li class="page-item {% if page_obj.number == page %}active{% endif %}">
+                        <a class="page-link" href="?page={{ page }}">
+                            {{ page }}
+                        </a>
+                    </li>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                            <span aria-hidden="true">Siguiente</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Siguiente">
+                            <span aria-hidden="true">Siguiente</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </section>
+    </div>
+</div>
+
+{% endblock %}

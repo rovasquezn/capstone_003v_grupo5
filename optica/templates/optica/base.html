@@ -8,7 +8,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <title>Sistema SGO - Optica Cruz</title>
+    <title>{% block title %}Optica Cruz{% endblock %}</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -17,11 +17,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-
     <!-- Styles  -->
     <link rel="stylesheet" href="{% static 'bootstrap/css/styles.css' %}">
-
-    <!-- <link rel="stylesheet" href="styles/styles.css"> -->
 
     <!-- Google fonts -->
     <link href="https://fonts.googleapis.com/css?family=Muli:300,700&display=swap" rel="stylesheet">
@@ -30,15 +27,100 @@
     <link href="https://unpkg.com/ionicons@4.5.10-0/dist/css/ionicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
+    <style>
+        /* Sidebar estilos */
+        #sidebar-container {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 250px;
+            z-index: 1050;
+            background: #03aae7;
+            transition: transform 0.3s ease;
+            transform: translateX(-100%);
+        }
 
+        #sidebar-container.show {
+            transform: translateX(0);
+        }
+
+        #content-wrapper {
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Asegura que el botón permanezca sobre el sidebar */
+        #toggle-sidebar {
+            z-index: 1100;
+            position: relative;
+            color: #fff;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+        }
+
+        /* En pantallas grandes, sidebar siempre visible */
+        @media (min-width: 992px) {
+            #sidebar-container {
+                transform: translateX(0);
+            }
+
+            #content-wrapper {
+                margin-left: 250px;
+            }
+
+            #toggle-sidebar {
+                display: none;
+            }
+        }
+
+        /* Ajustes navbar pequeña */
+        .navbar-small {
+            background: #03aae7;
+            color: #fff;
+            font-family: 'Muli', sans-serif;
+        }
+
+        .navbar-small .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #fff;
+        }
+
+        .navbar-small .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml;charset=UTF8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%28255,255,255,1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+        }
+
+        .navbar-custom {
+            background-color: #03aae7;
+        }
+
+        .navbar-custom .navbar-nav .nav-link {
+            color: #fff;
+        }
+
+        .navbar-custom .navbar-nav .nav-link:hover {
+            color: #ddd;
+        }
+
+        .navbar-custom .navbar-brand {
+            color: #fff;
+        }
+
+        .navbar-custom .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml;charset=UTF8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%28255,255,255,1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
 </head>
 
 <body>
 
-    <div class="d-flex" id="content-wrapper">
+    <div class="d-flex" id="content-wrapper" style="min-height: 100vh;">
 
         <!-- Sidebar -->
-        <div id="sidebar-container" class="bg-primary">
+        <div id="sidebar-container" class="bg-primary" style="min-height: 100vh;">
             <div class="logo">
                 <a href="{% url 'cliente_list' %}">
                     <img src="{% static '/images/Optica_Cruz_Blanco.png' %}" alt="Descripción de la imagen"
@@ -46,128 +128,65 @@
                 </a>
             </div>
             <div class="menu">
-                <a href="{% url 'cliente_list' %}" class="d-block text-light p-3 border-0"><i
-                        class="icon ion-md-people lead mr-2"></i>
-                    Clientes</a>
-                <a href="{% url 'receta_list' %}" class="d-block text-light p-3 border-0"><i
-                        class="icon ion-md-clipboard lead mr-2"></i>
-                    Recetas</a>
-
-
-                <a href="{% url 'ordenTrabajo_list' %}" class="d-block text-light p-3 border-0"><i
-                        class="icon ion-md-hammer lead mr-2"></i>
-                    Órdenes de trabajo</a>
-                <a href="#" class="d-block text-light p-3 border-0"><i class="icon ion-md-wallet lead mr-2"></i>
-                    Abonos</a>
-                <a href="#" class="d-block text-light p-3 border-0"><i class="icon ion-md-ribbon lead mr-2"></i>
-                    Certificados</a>
-                <a href="#" class="d-block text-light p-3 border-0"><i class="icon ion-md-calculator lead mr-2"></i>
-                    Cotizaciones</a>
-                <a href="#" class="d-block text-light p-3 border-0"> <i class="icon ion-md-settings lead mr-2"></i>
-                    Configuración</a>
+                <a href="{% url 'usuario_list' %}" class="d-block text-light p-3 border-0"><i class="icon ion-md-person lead mr-2"></i> Panel Usuarios</a>
+                <a href="{% url 'cliente_list' %}" class="d-block text-light p-3 border-0"><i class="icon ion-md-people lead mr-2"></i> Clientes</a>
+                <a href="{% url 'receta_list' %}" class="d-block text-light p-3 border-0"><i class="icon ion-md-clipboard lead mr-2"></i> Recetas</a>
+                <a href="{% url 'ordenTrabajo_list' %}" class="d-block text-light p-3 border-0"><i class="icon ion-md-hammer lead mr-2"></i> Órdenes de trabajo</a>
+                <a href="#" class="d-block text-light p-3 border-0"><i class="icon ion-md-cash lead mr-2"></i> Abonos</a>
+                <a href="#" class="d-block text-light p-3 border-0"><i class="icon ion-md-document lead mr-2"></i> Certificados</a>
             </div>
         </div>
         <!-- Fin sidebar -->
 
-
-        <div class="w-100">
-
-            <!-- Navbar -->
-            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-                <div class="container">
-
-                    <button class="navbar-toggler" type="button" data-toggle="collapse"
-                        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
+        <!-- Main Content -->
+        <div id="content" class="w-100">
+            <nav class="navbar navbar-expand-lg navbar-custom">
+                <div class="container-fluid">
+                    <!-- Botón para abrir/cerrar el sidebar -->
+                    <button class="btn d-lg-none" id="toggle-sidebar">
+                        <i class="bi bi-list"></i>
                     </button>
 
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <section class="bg-light py-3">
-                            <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown"
-                                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <!--                 <img src="assets/img/user-1.png" class="img-fluid rounded-circle avatar mr-2"
-                                        alt="photo" /> -->
-                                        Bienvenido, Rodrigo Vasquez
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                        <a class="dropdown-item" href="#">Mi perfil</a>
-
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#">Cerrar sesión</a>
-                                    </div>
-                                </li>
-                            </ul>
-                        </section>
+                    <!-- Nombre del usuario en la derecha con menú desplegable -->
+                    <div class="ml-auto">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-link dropdown-toggle text-white" type="button" id="userDropdown"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i> {{ user.first_name }} {{ user.ap_paterno }}
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="{% url 'mi_perfil' %}">Mi perfil</a>
+                                <a class="dropdown-item" href="{% url 'logout' %}">Cerrar sesión</a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <a class="nav-link text-white" href="{% url 'login' %}">Iniciar sesión</a>
+                        {% endif %}
                     </div>
                 </div>
             </nav>
-            <!-- Fin Navbar -->
-
-            <!-- <section class="bg-mix py-3">
-        <div class="container">
-            <div class="card rounded-0">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-3 col-md-6 d-flex stat my-3">
-                            <div class="mx-auto">
-                                <h6 class="text-muted">Ingresos mensuales</h6>
-                                <h3 class="font-weight-bold">$50000</h3>
-                                <h6 class="text-success"><i class="icon ion-md-arrow-dropup-circle"></i> 50.50%</h6>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6 d-flex stat my-3">
-                            <div class="mx-auto">
-                                <h6 class="text-muted">Productos activos</h6>
-                                <h3 class="font-weight-bold">100</h3>
-                                <h6 class="text-success"><i class="icon ion-md-arrow-dropup-circle"></i> 25.50%</h6>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6 d-flex stat my-3">
-                            <div class="mx-auto">
-                                <h6 class="text-muted">No. de usuarios</h6>
-                                <h3 class="font-weight-bold">2500</h3>
-                                <h6 class="text-success"><i class="icon ion-md-arrow-dropup-circle"></i> 75.50%</h6>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6 d-flex my-3">
-                            <div class="mx-auto">
-                                <h6 class="text-muted">Usuarios nuevos</h6>
-                                <h3 class="font-weight-bold">500</h3>
-                                <h6 class="text-success"><i class="icon ion-md-arrow-dropup-circle"></i> 15.50%</h6>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% block content %}{% endblock %}
         </div>
-    </section> -->
+    </div>
 
-
-            <!-- aqui va el contenido del template -->
-            {% block content%}
-
-
-            {% endblock %}
-
-            <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-            <!-- Optional JavaScript -->
-            <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-            <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-                integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-            <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
-                integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-                crossorigin="anonymous"></script>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
-                integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-                crossorigin="anonymous"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-
-
-
+    <!-- Optional JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script>
+        document.getElementById('toggle-sidebar').addEventListener('click', function () {
+            var sidebar = document.getElementById('sidebar-container');
+            sidebar.classList.toggle('show');
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

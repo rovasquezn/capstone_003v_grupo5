@@ -1,44 +1,57 @@
-from django.urls import include, path
-from rest_framework import routers
-from rest_framework.documentation import include_docs_urls
-from optica import views
-# from django.contrib.staticfiles.urls import static
-from django.conf.urls.static import static
+from django import views
+from django.urls import path, include
 from django.conf import settings
-
-from django.views.generic import TemplateView
-router = routers.DefaultRouter()
-#router.register(r'cliente', views.ClienteView, 'Cliente')
-# router.register(r'atendedor', views.AtendedorView, 'Atendedor')
-# router.register(r'tecnico', views.TecnicoView, 'Tecnico')
-# router.register(r'receta', views.RecetaView, 'Receta')
-# router.register(r'abono', views.AbonoView, 'Abono')
-# router.register(r'ordentrabajo', views.OrdenTrabajoView, 'Orden de Trabajo')
-# router.register(r'certificado', views.CertificadoView, 'Certificado')
-# router.register(r'administrador', views.AdministradorView, 'Administrador')
-
-
+from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
+from .views import CustomLoginView, CustomPasswordResetView, index, UsuarioListView, UsuarioCreateView, UsuarioUpdateView, UsuarioDeleteView, mi_perfil, ListarClienteView, CrearClienteView, EditarClienteView, EliminarClienteView, ListarRecetaView, CrearRecetaView, EditarRecetaView, EliminarRecetaView, ListarOrdenTrabajoView, CrearOrdenTrabajoView, EditarOrdenTrabajoView, EliminarOrdenTrabajoView, CustomPasswordResetConfirmView
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
-    #path("api/v1/", include(router.urls)),
-    path('docs/', include_docs_urls(title='Optica API')),
+    path('home/', index, name='index'),
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+
+    path('', RedirectView.as_view(url='/home/', permanent=False)),  # Redirigir la raíz a /home/
+
+    path('password_reset/', auth_views.PasswordResetView.as_view(
+        template_name='optica/password_reset.html',
+        email_template_name='optica/password_reset_email.html',
+        subject_template_name='optica/password_reset_subject.txt',
+        html_email_template_name='optica/password_reset_email.html'), 
+        name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(
+        template_name='optica/password_reset_done.html'), 
+         name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(
+        template_name='optica/password_reset_confirm.html'
+    ), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='optica/password_reset_complete.html'
+    ), name='password_reset_complete'),
+
+    path('usuarios/', UsuarioListView.as_view(), name='usuario_list'),
+    path('usuarios/create/', UsuarioCreateView.as_view(), name='usuario_create'),
+    path('usuarios/<int:pk>/update/', UsuarioUpdateView.as_view(), name='usuario_edit'),
+    path('usuarios/<int:pk>/delete/', UsuarioDeleteView.as_view(), name='usuario_delete'),
+
+    path('mi_perfil/', mi_perfil, name='mi_perfil'),
+
+    path('cliente_list/', ListarClienteView.as_view(), name='cliente_list'),
+    path('cliente_new/', CrearClienteView.as_view(), name='cliente_new'),    
+    path('<int:pk>/cliente_edit/', EditarClienteView.as_view(), name='cliente_edit'),
+    path('<int:pk>/cliente_delete/', EliminarClienteView.as_view(), name='cliente_delete'),
+
+    path('receta_list', ListarRecetaView.as_view(), name='receta_list'),
+    path('receta_new/', CrearRecetaView.as_view(), name='receta_new'),    
+    path('<int:pk>/receta_edit/', EditarRecetaView.as_view(), name='receta_edit'),
+    path('<int:pk>/receta_delete/', EliminarRecetaView.as_view(), name='receta_delete'),
+
+    path('ordenTrabajo_list', ListarOrdenTrabajoView.as_view(), name='ordenTrabajo_list'),
+    path('ordenTrabajo_new/', CrearOrdenTrabajoView.as_view(), name='ordenTrabajo_new'),    
+    path('<int:pk>/ordenTrabajo_edit/', EditarOrdenTrabajoView.as_view(), name='ordenTrabajo_edit'),
+    path('<int:pk>/ordenTrabajo_delete/', EliminarOrdenTrabajoView.as_view(), name='ordenTrabajo_delete'),
+
     
-    path('', views.index, name='index'),
-    path('cliente_list/', views.ListarClienteView.as_view(), name='cliente_list'),
-    path('cliente_new/', views.CrearClienteView.as_view(), name='cliente_new'),    
-    path('<int:pk>/cliente_edit/', views.EditarClienteView.as_view(), name='cliente_edit'),
-    path('<int:pk>/cliente_delete/', views.EliminarClienteView.as_view(), name='cliente_delete'),
-    
-    
-    path('receta_list', views.ListarRecetaView.as_view(), name='receta_list'),
-    path('receta_new/', views.CrearRecetaView.as_view(), name='receta_new'),    
-    path('<int:pk>/receta_edit/', views.EditarRecetaView.as_view(), name='receta_edit'),
-    path('<int:pk>/receta_delete/', views.EliminarRecetaView.as_view(), name='receta_delete'),
-    
-    path('ordenTrabajo_list', views.ListarOrdenTrabajoView.as_view(), name='ordenTrabajo_list'),
-    path('ordenTrabajo_new/', views.CrearOrdenTrabajoView.as_view(), name='ordenTrabajo_new'),    
-    path('<int:pk>/ordenTrabajo_edit/', views.EditarOrdenTrabajoView.as_view(), name='ordenTrabajo_edit'),
-    path('<int:pk>/ordenTrabajo_delete/', views.EliminarOrdenTrabajoView.as_view(), name='ordenTrabajo_delete'),
     
 ]
 
