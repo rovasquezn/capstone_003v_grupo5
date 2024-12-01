@@ -24,14 +24,14 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 class CustomUser(AbstractUser):
-    first_name = models.CharField(max_length=30)
-    ap_paterno = models.CharField(max_length=30)
-    ap_materno = models.CharField(max_length=30)
-    email = models.EmailField(unique=True)
-    rut = models.CharField(max_length=8)
-    dv = models.CharField(max_length=1)
-    celular = models.CharField(max_length=9)
-    user_type = models.PositiveSmallIntegerField(choices=[(1, 'Administrador'), (2, 'Atendedor'), (3, 'Técnico')])
+    first_name = models.CharField(max_length=30, verbose_name="Nombre")
+    ap_paterno = models.CharField(max_length=30, verbose_name="Apellido Paterno")
+    ap_materno = models.CharField(max_length=30, verbose_name="Apellido Materno")
+    email = models.EmailField(unique=True, verbose_name="Email")
+    rut = models.CharField(max_length=8, verbose_name="RUN")
+    dv = models.CharField(max_length=1, verbose_name="DV")
+    celular = models.CharField(max_length=9, verbose_name="Celular")
+    user_type = models.PositiveSmallIntegerField(choices=[(1, 'Administrador'), (2, 'Atendedor'), (3, 'Técnico')], verbose_name="Tipo de Usuario")
 
     def __str__(self):
         return self.username

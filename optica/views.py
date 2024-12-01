@@ -575,7 +575,7 @@ class UsuarioCreateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageM
     form_class = CustomUserCreationForm
     template_name = 'optica/usuario_form.html'
     success_url = reverse_lazy('usuario_list')
-    success_message = "Usuario creado con éxito."
+    success_message = "Usuario {username} creado con éxito."
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -588,7 +588,13 @@ class UsuarioCreateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageM
         self.object = form.save()
         password = form.cleaned_data.get('password1')
         send_user_creation_email(self.object, password)
+        # Limpiar los mensajes de error antes de agregar el mensaje de éxito
+        storage = messages.get_messages(self.request)
+        list(storage)  # Consume todos los mensajes para limpiarlos
         return super().form_valid(form)
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message.format(username=self.object.username)
 
     def form_invalid(self, form):
         messages.error(self.request, 'Por favor, corrija los errores en el formulario.')
@@ -596,6 +602,7 @@ class UsuarioCreateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageM
 
     def test_func(self):
         return self.request.user.is_authenticated and self.request.user.user_type == 1  # Solo Administrador
+    
 
 class UsuarioUpdateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, generic.UpdateView):
     model = CustomUser

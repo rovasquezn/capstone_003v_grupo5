@@ -10,6 +10,22 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+class AdminCustomUserChangeForm(UserChangeForm):
+    password = forms.CharField(label='Contraseña', widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'ap_paterno', 'ap_materno', 'email', 'rut', 'dv', 'celular', 'user_type', 'is_active', 'username', 'password']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password'].widget.attrs['readonly'] = True
+        self.fields['password'].widget = forms.TextInput(attrs={'readonly': 'readonly'})
+        self.fields['password'].help_text = (
+            "Las contraseñas no se almacenan en texto claro, por lo que no hay forma de ver la contraseña de este usuario, "
+            "pero puede cambiar la contraseña usando <a href='../password/'>este formulario</a>."
+        )
+
 class CustomUserCreationForm(UserCreationForm):
     first_name = forms.CharField(label='Nombre', widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}))
     ap_paterno = forms.CharField(label='Apellido Paterno', widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}))
@@ -59,18 +75,30 @@ class CustomUserCreationForm(UserCreationForm):
         return username
 
 class CustomUserChangeForm(UserChangeForm):
-    password = forms.CharField(label='Contraseña', widget=forms.TextInput(attrs={'readonly': 'readonly'}))
-
+    first_name = forms.CharField(label='Nombre', widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}))
+    ap_paterno = forms.CharField(label='Apellido Paterno', widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}))
+    ap_materno = forms.CharField(label='Apellido Materno', widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}))
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'class': 'form-control', 'required': 'required'}))
+    rut = forms.CharField(label='RUT', widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'required', 'pattern': '\d{7,8}', 'title': 'El RUT debe tener entre 7 y 8 dígitos.'}))
+    dv = forms.CharField(label='DV', widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'required', 'pattern': '[0-9Kk]', 'maxlength': '1', 'title': 'El DV debe ser un número o la letra K.'}))
+    celular = forms.CharField(label='Celular', widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'required', 'pattern': '\d{9}', 'maxlength': '9', 'title': 'El celular debe tener 9 dígitos.'}))
+    user_type = forms.ChoiceField(label='Tipo de Usuario', choices=[(1, 'Administrador'), (2, 'Atendedor'), (3, 'Técnico')], widget=forms.Select(attrs={'class': 'form-control', 'required': 'required'}))
+    is_active = forms.ChoiceField(
+        label='Estado',
+        choices=[(True, 'Activo'), (False, 'Inactivo')],
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True
+    )
+    username = forms.CharField(label='Nombre de Usuario', widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}))
+    
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'ap_paterno', 'ap_materno', 'email', 'rut', 'dv', 'celular', 'user_type', 'is_active', 'username', 'password']
+        fields = ['first_name', 'ap_paterno', 'ap_materno', 'email', 'rut', 'dv', 'celular', 'user_type', 'is_active', 'username']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['password'].help_text = (
-            "Las contraseñas no se almacenan en texto claro, por lo que no hay forma de ver la contraseña de este usuario, "
-            "pero puede cambiar la contraseña usando <a href='../password/'>este formulario</a>."
-        )
+        if 'password' in self.fields:
+            del self.fields['password']
         if 'password1' in self.fields:
             del self.fields['password1']
         if 'password2' in self.fields:
