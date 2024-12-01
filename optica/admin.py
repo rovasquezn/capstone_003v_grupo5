@@ -41,8 +41,7 @@ admin.site.register(Abono)
 admin.site.register(OrdenTrabajo)
 admin.site.register(Certificado)
 admin.site.register(LogEntry, LogEntryAdmin)
-""""
-admin.site.register(Atendedor)
-admin.site.register(Tecnico)
-admin.site.register(Administrador)
-"""	
+
+# admin.site.register(Atendedor)
+# admin.site.register(Tecnico)
+# admin.site.register(Administrador)

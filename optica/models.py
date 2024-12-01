@@ -54,44 +54,44 @@ class Cliente(models.Model):
         return f"{self.rutCliente}"
 
 
-class Atendedor(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
-    rutAtendedor = models.CharField(max_length=12)
-    dvRutAtendedor = models.CharField(max_length=1)
-    nombreAtendedor = models.CharField(max_length=20, verbose_name="Nombre")
-    apPaternoAtendedor = models.CharField(max_length=20, verbose_name="Apellido Paterno")
-    apMaternoAtendedor = models.CharField(max_length=20, verbose_name="Apellido Materno")
-    celularAtendedor = models.IntegerField(null=True, blank=True, verbose_name="Celular")
-    emailAtendedor = models.EmailField(max_length=30, null=True, blank=True, verbose_name="Correo Electrónico")
+# class Atendedor(models.Model):
+#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+#     rutAtendedor = models.CharField(max_length=12)
+#     dvRutAtendedor = models.CharField(max_length=1)
+#     nombreAtendedor = models.CharField(max_length=20, verbose_name="Nombre")
+#     apPaternoAtendedor = models.CharField(max_length=20, verbose_name="Apellido Paterno")
+#     apMaternoAtendedor = models.CharField(max_length=20, verbose_name="Apellido Materno")
+#     celularAtendedor = models.IntegerField(null=True, blank=True, verbose_name="Celular")
+#     emailAtendedor = models.EmailField(max_length=30, null=True, blank=True, verbose_name="Correo Electrónico")
 
-    def __str__(self):
-        return self.user.username
+#     def __str__(self):
+#         return self.user.username
 
-class Tecnico(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
-    rutTecnico = models.IntegerField(verbose_name="RUN Técnico")
-    dvRutTecnico = models.CharField(max_length=1, verbose_name="Digito")
-    nombreTecnico = models.CharField(max_length=20, verbose_name="Nombre")
-    apPaternoTecnico = models.CharField(max_length=20, verbose_name="Apellido Paterno")
-    apMaternoTecnico = models.CharField(max_length=20, verbose_name="Apellido Materno")
-    celularTecnico = models.IntegerField(null=True, blank=True, verbose_name="Celular")
-    emailTecnico = models.EmailField(max_length=30, null=True, blank=True, verbose_name="Correo Electrónico")
+# class Tecnico(models.Model):
+#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+#     rutTecnico = models.IntegerField(verbose_name="RUN Técnico")
+#     dvRutTecnico = models.CharField(max_length=1, verbose_name="Digito")
+#     nombreTecnico = models.CharField(max_length=20, verbose_name="Nombre")
+#     apPaternoTecnico = models.CharField(max_length=20, verbose_name="Apellido Paterno")
+#     apMaternoTecnico = models.CharField(max_length=20, verbose_name="Apellido Materno")
+#     celularTecnico = models.IntegerField(null=True, blank=True, verbose_name="Celular")
+#     emailTecnico = models.EmailField(max_length=30, null=True, blank=True, verbose_name="Correo Electrónico")
 
-    def __str__(self):
-        return f"{self.nombreTecnico} {self.apPaternoTecnico} {self.apMaternoTecnico}"
+#     def __str__(self):
+#         return f"{self.nombreTecnico} {self.apPaternoTecnico} {self.apMaternoTecnico}"
 
-class Administrador(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
-    rutAdministrador = models.IntegerField(verbose_name="RUN Administrador")
-    dvRutAdministrador = models.CharField(max_length=1, verbose_name="Digito")
-    nombreAdministrador = models.CharField(max_length=20, verbose_name="Nombre")
-    apPaternoAdministrador = models.CharField(max_length=20, verbose_name="Apellido Paterno")
-    apMaternoAdministrador = models.CharField(max_length=20, verbose_name="Apellido Materno")
-    celularAdministrador = models.IntegerField(null=True, blank=True, verbose_name="Celular")
-    emailAdministrador = models.EmailField(max_length=30, null=True, blank=True, verbose_name="Correo Electrónico")
+# class Administrador(models.Model):
+#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+#     rutAdministrador = models.IntegerField(verbose_name="RUN Administrador")
+#     dvRutAdministrador = models.CharField(max_length=1, verbose_name="Digito")
+#     nombreAdministrador = models.CharField(max_length=20, verbose_name="Nombre")
+#     apPaternoAdministrador = models.CharField(max_length=20, verbose_name="Apellido Paterno")
+#     apMaternoAdministrador = models.CharField(max_length=20, verbose_name="Apellido Materno")
+#     celularAdministrador = models.IntegerField(null=True, blank=True, verbose_name="Celular")
+#     emailAdministrador = models.EmailField(max_length=30, null=True, blank=True, verbose_name="Correo Electrónico")
 
-    def __str__(self):
-        return f"{self.nombreAdministrador} {self.apPaternoAdministrador} {self.apMaternoAdministrador}"
+#     def __str__(self):
+#         return f"{self.nombreAdministrador} {self.apPaternoAdministrador} {self.apMaternoAdministrador}"
 
     
 class Receta(models.Model):

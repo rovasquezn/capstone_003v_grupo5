@@ -12,11 +12,10 @@ from django.db.models import Q, Max, QuerySet
 from typing import Any
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-from .forms import (
-    AdministradorChangeForm, AdministradorCreationForm, AtendedorChangeForm, AtendedorCreationForm, CustomUserCreationForm, CustomUserChangeForm, 
-    CustomPasswordChangeForm, RecetaForm, OrdenTrabajoForm, TecnicoChangeForm, TecnicoCreationForm, UserProfileForm
-)
-from .models import Cliente, Receta, OrdenTrabajo, Administrador, Atendedor, Tecnico, CustomUser
+from .forms import (CustomUserCreationForm, CustomUserChangeForm, 
+    CustomPasswordChangeForm, RecetaForm, OrdenTrabajoForm, UserProfileForm
+)#AdministradorChangeForm, AdministradorCreationForm, AtendedorChangeForm, AtendedorCreationForm, 
+from .models import Cliente, Receta, OrdenTrabajo, CustomUser # Administrador, Atendedor, Tecnico, 
 from datetime import datetime
 from optica import models
 from django.http import JsonResponse
@@ -27,15 +26,15 @@ User = get_user_model()
 
 
 # Funciones auxiliares
-def get_profile_and_form(user):
-    """Devuelve el perfil asociado al usuario y el formulario correspondiente."""
-    if user.user_type == 1:
-        return getattr(user, 'administrador', None), AdministradorChangeForm
-    elif user.user_type == 2:
-        return getattr(user, 'atendedor', None), AtendedorChangeForm
-    elif user.user_type == 3:
-        return getattr(user, 'tecnico', None), TecnicoChangeForm
-    return None, None
+# def get_profile_and_form(user):
+#     """Devuelve el perfil asociado al usuario y el formulario correspondiente."""
+#     if user.user_type == 1:
+#         return getattr(user, 'administrador', None), AdministradorChangeForm
+#     elif user.user_type == 2:
+#         return getattr(user, 'atendedor', None), AtendedorChangeForm
+#     elif user.user_type == 3:
+#         return getattr(user, 'tecnico', None), TecnicoChangeForm
+#     return None, None
 
 @login_required
 def index(request):
@@ -570,6 +569,7 @@ class UsuarioListView(LoginRequiredMixin, UserPassesTestMixin, generic.ListView)
     def test_func(self):
         return self.request.user.is_authenticated and self.request.user.user_type in [1, 2, 3]  # Administrador y Atendedor
 
+#Usuarios
 class UsuarioCreateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, generic.CreateView):
     model = CustomUser
     form_class = CustomUserCreationForm
