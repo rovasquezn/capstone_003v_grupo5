@@ -570,9 +570,9 @@
                         </div>
 
                         {{ form.fechaOrdenTrabajo.as_hidden }}
-                        {{ form.rutAtendedor.as_hidden }}
+                        {% comment %} {{ form.rutAtendedor.as_hidden }}
                         {{ form.rutTecnico.as_hidden }}
-                        {{ form.rutAdministrador.as_hidden }}
+                        {{ form.rutAdministrador.as_hidden }} {% endcomment %}
 
 
                         {% else %}
