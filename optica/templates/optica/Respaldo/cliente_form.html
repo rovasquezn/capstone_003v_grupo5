@@ -1,0 +1,88 @@
+{% extends 'optica/base.html' %}
+{% load static crispy_forms_tags %}
+
+{% block content%}
+
+
+
+<!-- Page Content -->
+<div id="content" class="bg-grey w-100">
+
+    <section class="bg-light py-3">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-9 col-md-8">
+                    <h1 class="font-weight-bold mb-0">
+                        {% if cliente %}
+                        Editar Cliente
+                        {% else %}
+                        Crear Cliente
+                        {% endif %}
+
+                    </h1>
+                    <p class="lead text-muted">Ingrese los datos solicitados</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <div class="card-center">
+        <div class="ml-5 mb-5">
+
+            <div class="card border-info" style="max-width: 40rem;">
+                <div class="card border border-1 shadow rounded p-3 ">
+                    <!-- <div class="scrollable-form"> -->
+                    <form action="" method="post" class="mt-3 mx-auto" style="max-width: 500px;"
+                        enctype="multipart/form-data" novalidate>
+
+                        {% csrf_token %}
+                        {{ form|crispy }}
+
+                        <a href="{% url 'cliente_list' %}" class="btn btn-secondary mr-3">Cancelar</a>
+
+                        <button class="btn btn-primary">
+                            Guardar Datos
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 
+    <script>
+
+        toastr.success('Have fun storming the castle!', 'Miracle Max Says')
+    </script>
+
+    <div id="mensajeConfirmacion" class="alert alert-success alert-dismissible fade show" role="alert"
+        style="display:none;">
+        La receta se ha eliminado exitosamente
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+
+    <script>
+        function mostrarMensajeConfirmacion() {
+            // Mostrar el mensaje de confirmación
+            var mensaje = document.getElementById('mensajeConfirmacion');
+            mensaje.style.display = 'block'; // Mostrar el mensaje
+
+            // Ocultar el mensaje después de 2 segundos
+            setTimeout(function () {
+                var alert = new bootstrap.Alert(mensaje);
+                alert.close(); // Usar Bootstrap para cerrar la alerta
+            }, 2000);
+        }
+    </script> -->
+
+
+
+
+
+</div>
+{% endblock content %}

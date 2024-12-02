@@ -1,5 +1,6 @@
 {% extends 'optica/base.html' %}
 {% load static %}
+{% load humanize %}
 {% block content%}
 
 
@@ -91,13 +92,11 @@
                             <th scope="col">Fecha Orden T.</th>
                             <th scope="col">Fecha entrega</th>
                             <th scope="col">Valor Total </th>
-                            <th scope="col">Observaciones</th>
+                            <th scope="col">Estado Orden de Trabajo</th>
 
                         </tr>
                     </thead>
                     <tbody>
-
-
                         {% for ordenTrabajo in object_list %}
                         <tr>
                             <td>{{ ordenTrabajo.idOrdenTrabajo }}</td>
@@ -109,7 +108,7 @@
                             <td>{{ ordenTrabajo.fechaOrdenTrabajo |date:'d/m/Y' |default:'' }}</td>
                             <td>{{ ordenTrabajo.fechaEntregaOrdenTrabajo |date:'d/m/Y' |default:'' }}</td>
                             <td>{{ ordenTrabajo.totalOrdenTrabajo |default:'' }}</td>
-                            <td>{{ ordenTrabajo.observacionOrdenTrabajo |default:'' }}</td>
+                            <td class="text-uppercase">{{ ordenTrabajo.estadoOrdenTrabajo |default:'' }}</td>
 
                             <td>
                                 <div class="btn-group btn-group-sm">
@@ -122,12 +121,25 @@
                                         <i class="bi bi-pencil"></i> <!-- Icono de lápiz para editar -->
                                     </a>
 
+                                    <a href="{% url 'abono_new' %}?idOrdenTrabajo={{ ordenTrabajo.idOrdenTrabajo }}&q={{ ordenTrabajo.idOrdenTrabajo }}"
+                                        class="btn btn-success">
+                                        <i class="bi bi-cash"></i><!-- Icono de moneda -->
+                                    </a>
+
+
+                                    <!-- <a href="{% url 'abono_new' %}?idOrdenTrabajo={{ ordenTrabajo.idOrdenTrabajo }}"
+                                    class="btn btn-success">
+                                    <i class="bi bi-cash"></i>
+                                    </a> -->
+
 
                                     <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                         data-bs-target="#eliminarOrdenTrabajoModal{{ ordenTrabajo.idOrdenTrabajo }}">
                                         <i class="bi bi-trash"></i> <!-- Icono de basura para eliminar -->
                                     </button>
                                 </div>
+
+
                                 <!-- --MODAL PARA ELIMINAR ORDEN DE TRABAJO -->
                                 <a data-bs-toggle="modal"
                                     data-bs-target="#eliminarOrdenTrabajoModal{{ ordenTrabajo.idOrdenTrabajo }}">
@@ -170,7 +182,6 @@
                                         </div>
                                     </div>
                                 </a>
-
                             </td>
                         </tr>
 
@@ -181,17 +192,21 @@
                                 tabindex="-1" aria-labelledby="ordenTrabajoModalLabel{{ ordenTrabajo.idOrdenTrabajo }}"
                                 aria-hidden="true">
 
-                                <div class="modal-dialog" style=" max-width: 50%;">
+                                <div class="modal-dialog" style=" max-width: 53%;">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" style="font-weight: bold;"
+                                            <img src="{% static '/images/Optica_Cruz_Celeste.png' %}"
+                                                alt="Descripción de la imagen" style="width: 180px; height: auto;">
+                                            <h5 class="modal-title mt-3" style="font-weight: bold;"
                                                 id="recetaModalLabel{{ ordenTrabajo.idOrdenTrabajo}} ">
-                                                Detalle de la Orden de Trabajo - Número
+                                                ORDEN DE TRABAJO - Número
                                                 {{ ordenTrabajo.numeroOrdenTrabajo |default:'' }}
                                             </h5>
 
-                                            <p><span class="font-weight-bold mt-4" id="texto-modal">Creada el:</span>
-                                                {{ ordenTrabajo.fechaOrdenTrabajo | date:'d/m/Y'|default:'' }}
+                                            <p>
+                                            <div class="font-weight-bold mt-4" id="texto-modal">Creada el:</div>
+                                            <div class="font-weight-bold mt-4">
+                                                {{ ordenTrabajo.fechaOrdenTrabajo | date:'d/m/Y'|default:'--' }}</div>
                                             </p>
 
                                             <button type="button" class="btn-info" data-bs-dismiss="modal"
@@ -199,7 +214,10 @@
                                         </div>
 
                                         <div class="modal-body">
+                                            <div class="row">
+                                                <h6 class="col-md-12 font-weight-bold text-center"> DATOS CLIENTE </h6>
 
+                                            </div>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">RUN:</span>
@@ -208,7 +226,7 @@
                                                     </p>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <p><span class="font-weight-bold" id="texto-modal">Cliente:</span>
+                                                    <p><span class="font-weight-bold" id="texto-modal">Nombre:</span>
                                                         <span id="letras-modal">
                                                             {{ ordenTrabajo.idReceta.nombreCliente | upper }}
                                                             {{ ordenTrabajo.idReceta.apPaternoCliente | upper }}
@@ -217,25 +235,39 @@
                                                     </p>
                                                 </div>
                                             </div>
-
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">Celular:</span>
-                                                        {{ ordenTrabajo.idReceta.celularCliente |default:'' }}</p>
+                                                        {{ ordenTrabajo.idReceta.celularCliente |default:'--' }}</p>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-2">
                                                     <p><span class="font-weight-bold" id="texto-modal">Teléfono:</span>
-                                                        {{ ordenTrabajo.idReceta.telefonoCliente |default:'' }}</p>
+                                                        {{ ordenTrabajo.idReceta.telefonoCliente |default:'--' }}</p>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-7">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Dirección:</span>
+                                                        {{ ordenTrabajo.idReceta.direccionCliente |default:'--' }}</p>
                                                 </div>
                                             </div>
 
-
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <p><span class="font-weight-bold" id="texto-modal">Número de
-                                                            Receta:</span>
-                                                        {{ ordenTrabajo.idReceta.numeroReceta |default:'' }}</p>
+                                                    <p><span class="font-weight-bold" id="texto-modal">Fecha de
+                                                            Entrega:</span>
+                                                        {{ordenTrabajo.fechaEntregaOrdenTrabajo|default:'--'}}
+                                                    </p>
                                                 </div>
+                                                <div class="col-md-3">
+                                                    <p>
+                                                        <span class="font-weight-bold" id="texto-modal">Hora:</span>
+                                                        {{ordenTrabajo.horaEntregaOrdenTrabajo|default:'--'}}
+                                                    </p>
+                                                </div>
+
 
                                             </div>
 
@@ -245,214 +277,488 @@
                                                 </div>
                                             </div>
 
+                                            <div class="row justify-content-center">
 
-
-
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <p class="font-weight-bold" id="texto-modal">Lejos</p>
+                                                <div class="col-md-4">
+                                                    <p><span class="font-weight-bold" id="texto-modal">NÚMERO DE
+                                                            RECETA:</span>
+                                                        {{ ordenTrabajo.idReceta.numeroReceta |default:'--' }}</p>
                                                 </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col" style="width: 10%;">
-                                                    <p>---</p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">Esfera</span></p>
+                                                <div class="col-md-4">
+                                                    <p><span class="font-weight-bold" id="texto-modal">ID DE
+                                                            RECETA:</span>
+                                                        {{ ordenTrabajo.idReceta.idReceta |default:'--' }}</p>
                                                 </div>
 
-                                                <div class="col" style="width: 22%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">Cilindro</span>
-                                                    </p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">Eje</span></p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">DP</span>
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col" style="width: 12%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">OD</span></p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.lejosOdEsfera |default:'' }}</p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.lejosOdCilindro |default:'' }}</p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.lejosOdEje |default:'' }}</p>
-                                                </div>
-
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.dpLejos |default:'' }}</p>
-                                                </div>
-                                            </div>
-
-
-                                            <div class="row">
-                                                <div class="col" style="width: 12%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">OI</span></p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.lejosOiEsfera |default:'' }}</p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.lejosOiCilindro |default:'' }}</p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.lejosOiEje |default:'' }}</p>
-                                                </div>
-
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p></p>
-                                                </div>
-                                            </div>
-
-
-                                            <div class="row">
-                                                <div class="col-md-12 text-center">
-                                                    <hr style="width: 100%; border: 1px solid #06818e;">
-                                                </div>
-                                            </div>
-
-
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <p class="font-weight-bold" id="texto-modal">Cerca</p>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col" style="width: 12%;">
-                                                    <p>---</p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">Esfera</span></p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">Cilindro</span>
-                                                    </p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">Eje</span></p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">DP</span>
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col" style="width: 12%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">OD</span></p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.cercaOdEsfera |default:'' }}</p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.cercaOdCilindro |default:'' }}</p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.cercaOdEje |default:'' }}</p>
-                                                </div>
-
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.dpCerca |default:'' }}</p>
-                                                </div>
-                                            </div>
-
-
-                                            <div class="row">
-                                                <div class="col" style="width: 12%;">
-                                                    <p><span class="font-weight-bold" id="texto-modal">OI</span></p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.cercaOiEsfera |default:'' }}</p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.cercaOiCilindro |default:'' }}</p>
-                                                </div>
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p>{{ ordenTrabajo.idReceta.cercaOiEje |default:'' }}</p>
-                                                </div>
-
-
-                                                <div class="col" style="width: 22%;">
-                                                    <p></p>
-                                                </div>
-                                            </div>
-
-
-                                            <div class="row">
-                                                <div class="col-md-12 text-center">
-                                                    <hr style="width: 100%; border: 1px solid #06818e;">
-                                                </div>
                                             </div>
 
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">Tipo de
                                                             lente:</span>
-                                                        {{ ordenTrabajo.idReceta.tipoLente|default:""|upper }}</p>
+                                                        {{ ordenTrabajo.idReceta.tipoLente|default:"--"|upper }}
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Altura:</span>
+                                                        {{ ordenTrabajo.altura|default:"--"|upper }}
+                                                    </p>
                                                 </div>
                                             </div>
-
 
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold"
                                                             id="texto-modal">Institución:</span>
-                                                        {{ ordenTrabajo.idReceta.institucion|default:""|upper }}</p>
+                                                        {{ ordenTrabajo.idReceta.institucion|default:"--"|upper }}
+                                                    </p>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">
                                                             Doctor(a) Oftalmología:</span>
-                                                        {{ ordenTrabajo.idReceta.doctorOftalmologo |default:""|upper }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <!-- Observaciones pueden ir en una sola fila ocupando ambas columnas -->
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <p><span class="font-weight-bold"
-                                                            id="texto-modal">Observaciones:</span>
-                                                        {{ ordenTrabajo.idReceta.observacionReceta |default:""|upper }}
+                                                        {{ordenTrabajo.idReceta.doctorOftalmologo|default:"--"|upper}}
                                                     </p>
                                                 </div>
                                             </div>
 
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Cerrar</button>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <p><span class="font-weight-bold"
+                                                            id="texto-modal">Observaciones:</span>
+                                                        {{ordenTrabajo.idReceta.observacionReceta|default:"--"|upper }}
+                                                    </p>
+                                                </div>
                                             </div>
+
+                                            <div class="card border border-1 shadow rounded p-3 ">
+                                                <h6 class="card-header text-Dark font-weight-bold">LEJOS</h6>
+                                                <div class="card-body">
+
+                                                    <div class="row">
+                                                        <div class=col style="max-width:100px">
+                                                            <p></p>
+                                                        </div>
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Esfera</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Cilindro</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Eje</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">DP</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Grados</span>
+                                                            </p>
+                                                        </div>
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Prisma</span>
+                                                            </p>
+                                                        </div>
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Adición</span>
+                                                            </p>
+                                                        </div>
+
+                                                    </div>
+
+
+                                                    <div class="row">
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold" id="texto-modal">OD</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.lejosOdEsfera |default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.lejosOdCilindro |default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.lejosOdEje |default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.dpLejos |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.gradoLejosOd |default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.prismaLejosOd |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.adicionLejosOd |default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="row">
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold" id="texto-modal">OI</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.lejosOiEsfera |default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.lejosOiCilindro |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.lejosOiEje |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.gradoLejosOi |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.prismaLejosOi |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.adicionLejosOi |default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <p><span class="font-weight-bold">
+                                                                    LABORATORIO: </span>
+                                                                {{ordenTrabajo.laboratorioLejos|default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <p><span class="font-weight-bold">
+                                                                    TIPO DE CRISTAL: </span>
+                                                                {{ordenTrabajo.tipoCristalLejos|default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <p><span class="font-weight-bold">
+                                                                    COLOR CRISTAL: </span>
+                                                                {{ordenTrabajo.colorCristalLejos|default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <p><span class="font-weight-bold">
+                                                                    MARCO: </span>
+                                                                {{ordenTrabajo.marcoLejos|default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12 text-center">
+                                                    <hr style="width: 100%; border: 1px solid #06818e;">
+                                                </div>
+                                            </div>
+
+                                            <div class="card border border-1 shadow rounded p-3 ">
+                                                <h6 class="card-header font-weight-bold">
+                                                    CERCA
+
+
+
+
+                                                </h6>
+                                                <div class="card-body">
+
+                                                    <div class="row">
+                                                        <div class=col style="max-width:100px">
+                                                            <p></p>
+                                                        </div>
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Esfera</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Cilindro</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Eje</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">DP</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Grados</span>
+                                                            </p>
+                                                        </div>
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Prisma</span>
+                                                            </p>
+                                                        </div>
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold text-align-center"
+                                                                    id="texto-modal">Adición</span>
+                                                            </p>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold" id="texto-modal">OD</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.cercaOdEsfera |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.cercaOdCilindro |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.cercaOdEje |default:'--' }}</p>
+                                                        </div>
+
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.dpCerca |default:'--' }}</p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.gradoCercaOd |default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.prismaCercaOd |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.adicionCercaOd |default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="row">
+                                                        <div class=col style="max-width:100px">
+                                                            <p><span class="font-weight-bold" id="texto-modal">OI</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.cercaOiEsfera |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.cercaOiCilindro |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.idReceta.cercaOiEje |default:'--' }}</p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p></p>
+                                                        </div>
+
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.gradoCercaOi |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.prismaCercaOi |default:'--' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="col text-align-center" style="max-width:100px">
+                                                            <p>{{ ordenTrabajo.adicionCercaOi |default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <p><span class="font-weight-bold">
+                                                                    LABORATORIO: </span>
+                                                                {{ordenTrabajo.laboratorioCerca|default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <p><span class="font-weight-bold">
+                                                                    TIPO DE CRISTAL: </span>
+                                                                {{ordenTrabajo.tipoCristalCerca|default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <p><span class="font-weight-bold">
+                                                                    COLOR CRISTAL: </span>
+                                                                {{ordenTrabajo.colorCristalCerca|default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <p><span class="font-weight-bold">
+                                                                    MARCO: </span>
+                                                                {{ordenTrabajo.marcoCerca|default:'--' }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12 text-center">
+                                                    <hr style="width: 100%; border: 1px solid #06818e;">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <p><span class="font-weight-bold">
+                                                            OBSERVACIONES: </span>
+                                                        {{ordenTrabajo.observacionOrdenTrabajo|default:'--' }}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12 text-center">
+                                                    <hr style="width: 100%; border: 1px solid #06818e;">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold">
+                                                            VALOR MARCO LEJOS: </span>
+                                                        ${{ordenTrabajo.valorMarcoLejos|default:0|intcomma }}
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold">
+                                                            VALOR MARCO CERCA: </span>
+                                                        ${{ordenTrabajo.valorMarcoCerca|default:0|intcomma }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold">
+                                                            VALOR CRISTALES LEJOS: </span>
+                                                        ${{ordenTrabajo.valorCristalesLejos|default:0|intcomma }}
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold">
+                                                            VALOR CRISTALES CERCA: </span>
+                                                        ${{ordenTrabajo.valorCristalesCerca|default:0|intcomma }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+
+                                                    <p>
+                                                        <span class="font-weight-bold">VALOR TOTAL (LEJOS): </span>
+                                                        ${{ ordenTrabajo.totalLejos|default:0|intcomma }}
+                                                    </p>
+
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold">
+                                                            VALOR TOTAL (CERCA): </span>
+                                                        ${{ordenTrabajo.totalCerca|default:0|intcomma }}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+
+
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold">
+                                                            TOTAL: </span>
+                                                        ${{ordenTrabajo.totalOrdenTrabajo|default:0|intcomma }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold">
+                                                            Estado del Pago: </span>
+                                                        {{ordenTrabajo.estadoDelPago }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cerrar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -464,65 +770,36 @@
             </div>
         </div>
 
-        <div class="text-success text-left mt-3 ml-5">
-            {{ page_obj.paginator.count }} Resultado{{ page_obj.paginator.count|pluralize }}
-        </div>
-
-        <div class="d-flex justify-content-center">
-            <small class="d-none d-sm-inline-block text-body">
-                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-            </small>
-        </div>
-
         <section>
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link"
-                            href="{% url 'ordenTrabajo_list' %}?page={{ page_obj.previous_page_number }}"
-                            aria-label="Anterior">
-                            <span aria-hidden="true">
-                                Anterior </span>
-                        </a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" aria-label="Anterior">
-                            <span aria-hidden="true">
-                                Anterior </span>
-                        </a>
-                    </li>
-                    {% endif %}
+            <!-- PAGINACION -->
+            <div class="text-success text-left mt-3 ml-5">
+                {{ page_obj.paginator.count }} Resultado{{ page_obj.paginator.count|pluralize }}
+            </div>
+            <div class="d-flex justify-content-center">
+                <small class="d-none d-sm-inline-block text-body">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </small>
+            </div>
 
-                    {% for page in page_obj.adjusted_elided_pages %}
-                    <li class="page-item {% if page_obj.number == page %}active{% endif %}">
-                        <a class="page-link" href="{% url 'ordenTrabajo_list' %}?page={{ page }}">
-                            {{ page }}
-                        </a>
-                    </li>
-                    {% endfor %}
+            <div class="pagination d-flex justify-content-center">
+                <ul class="pagination">
+                    {% if is_paginated %}
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?q={{ request.GET.q }}&page=1">Primera</a></li>
+                    <li class="page-item"><a class="page-link"
+                            href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">Anterior</a></li>
+                    {% endif %}
 
                     {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="{% url 'ordenTrabajo_list' %}?page={{ page_obj.next_page_number }}"
-                            aria-label="Siguiente">
-                            <span aria-hidden="true">
-                                Siguiente
-                            </span>
-                        </a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" aria-label="Siguiente">
-                            <span aria-hidden="true">
-                                Siguiente
-                            </span>
-                        </a>
-                    </li>
+                    <li class="page-item"><a class="page-link"
+                            href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">Siguiente</a></li>
+                    <li class="page-item"><a class="page-link"
+                            href="?q={{ request.GET.q }}&page={{ page_obj.paginator.num_pages }}">Última</a></li>
+                    {% endif %}
                     {% endif %}
                 </ul>
-            </nav>
+            </div>
+            <!-- FIN PAGINACION -->
         </section>
     </div>
 </div>

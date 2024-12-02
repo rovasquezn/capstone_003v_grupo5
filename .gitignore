@@ -1,0 +1,6 @@
+/venv
+/optica/__pycache__
+
+/optica/migrations/__pycache__
+
+/proyecto_optica_cruz/__pycache__

@@ -1,0 +1,342 @@
+{% extends 'optica/base.html' %}
+{% load static %}
+{% block content%}
+
+
+{% if messages %}
+{% for message in messages %}
+<div id="mensajeConfirmacion" class="alert-success align-items-center text-bg-success border-0" role="alert"
+    aria-live="assertive" aria-atomic="true" style="position: fixed; top: 20px; right: 20px; min-width: 250px;">
+    <div class="d-flex">
+        <div class="toast-body">
+            {{ message }}
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var toastEl = document.getElementById('mensajeConfirmacion');
+        if (toastEl) {
+            var toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+            toast.show();
+        }
+    });
+</script>
+
+<!-- Page Content -->
+<div id="content" class="bg-grey w-100">
+
+    <section class="bg-light py-3">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-md-5">
+                    <h1 class="font-weight-bold mb-0">Abonos</h1>
+                    <p class="lead text-muted">Lista de los abonos registradas en sistema</p>
+                </div>
+
+                <div class="col-lg-3 col-md-4 d-flex">
+                    <a href="{% url 'abono_new' %}" class="btn btn-primary w-100 align-self-center">
+                        Registrar Abono</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="mt-0">
+        <div class="container-fluid w-100">
+            <div class="card border border-1 shadow rounded p-3 ">
+
+                <!-- Buscar por -->
+                <form action="" style="max-width: 550px;">
+                    <div class="input-group">
+                        <input type="text" class="form-control"
+                            placeholder="Buscar por Nombre, Apellido o RUN (Sin guión)" name="q"
+                            value="{{ request.GET.q }}">
+                        <button class="btn btn-primary">
+                            Buscar Abono
+                        </button>
+                    </div>
+                </form>
+
+                <br>
+
+                <!-- Tabla de Abonos -->
+
+                <style>
+                    .table-condensed {
+                        font-size: 12px;
+                        /* Ajusta este valor según lo necesites */
+                    }
+
+                    .table-condensed th,
+                    .table-condensed td {
+                        padding-top: 5px;
+                        padding-bottom: 5px;
+                        /* Reduce el espacio entre celdas */
+                    }
+                </style>
+
+                <table class="table table-condensed table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <!-- idAbono',
+                            'idOrdenTrabajo',
+                            'rutCliente',
+                            'fechaAbono',
+                            'valorAbono',
+                            'saldo',
+                            'tipoPagoAbono',
+                            'numeroVoucherAbono',
+                            'numeroAbono' -->
+                            <th scope="col">Orden de Trabajo</th>
+                            <th scope="col">Número de Abono</th>
+                            <th scope="col">RUN</th>
+                            <th scope="col">Nombre Cliente</th>
+                            <th scope="col">Fecha Abono</th>
+                            <th scope="col">Tipo de Pago del abono</th>
+                            <th scope="col">Valor Total</th>
+                            <th scope="col">Monto Abonado</th>
+                            <!-- <th scope="col">Saldo Anterior</th> -->
+                            <th scope="col">Saldo</th>
+                            <th scope="col">Voucher</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {% for abono in object_list %}
+                        <tr>
+                            <td>{{ abono.idOrdenTrabajo.numeroOrdenTrabajo |default:'-' }}</td>
+                            <td>{{ abono.numeroAbono }}</td>
+                            <td>{{ abono.rutCliente.rutCliente }}-{{ abono.rutCliente.dvRutCliente }}</td>
+                            <td class="text-uppercase">{{ abono.rutCliente.nombreCliente }}
+                                {{ abono.rutCliente.apPaternoCliente }}
+                                {{ abono.rutCliente.apMaternoCliente |default:'' }}</td>
+                            <td>{{ abono.fechaAbono |date:'d/m/Y' }}</td>
+                            <td class="text-uppercase">{{ abono.tipoPagoAbono |default:'-' }}</td>
+                            <td>{{ abono.idOrdenTrabajo.totalOrdenTrabajo |default:'-' }}</td>
+                            <td>{{ abono.valorAbono |default:'-' }}</td>
+                            <!-- <td>{{ abono.saldoAnterior |default:'-' }}</td> -->
+                            <td>{{ abono.saldo |default:'-' }}</td>
+                            <td>{{ abono.numeroVoucherAbono |default:'-' }}</td>
+
+
+
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-info" data-bs-toggle="modal"
+                                        data-bs-target="#abonoModal{{ abono.idAbono }}">
+                                        <i class="bi bi-eye"></i><!-- Icono de OJO para ver detalle -->
+                                    </button>
+
+                                    <a href="{% url 'abono_edit' abono.pk %}" class="btn btn-primary">
+                                        <i class="bi bi-pencil"></i> <!-- Icono de lápiz para editar -->
+                                    </a>
+
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                        data-bs-target="#eliminarAbonoModal{{ abono.idAbono }}">
+                                        <i class="bi bi-trash"></i> <!-- Icono de basura para eliminar -->
+                                    </button>
+
+
+                                </div>
+                                <!-- --MODAL PARA ELIMINAR ABONO -->
+                                <a data-bs-toggle="modal" data-bs-target="#eliminarAbonoModal{{ abono.idAbono }}">
+
+                                    <div class="modal fade" id="eliminarAbonoModal{{ abono.idAbono  }}" tabindex="-1"
+                                        aria-labelledby="eliminarAbonoModal{{ abono.idAbono  }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title font-weight-bold"
+                                                        id="eliminarAbonoModalLabel{{ abono.idAbono  }}">
+                                                        Eliminar Abono</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <span class="font-weight-bold text-center">
+                                                        <h5>
+                                                            ¿Está seguro de eliminar el abono
+                                                            {{ abono.numeroAbono}} <br>
+                                                            de Orden de Trabajo Número
+
+                                                            {{ abono.idOrdenTrabajo.numeroOrdenTrabajo }}?
+                                                        </h5>
+                                                    </span>
+                                                    <form method="post" class="mt-3 text-center"
+                                                        action="{% url 'abono_delete' abono.idAbono %}">
+                                                        {% csrf_token %}
+                                                        <a href="{% url 'abono_list' %}"
+                                                            class="btn btn-secondary me-1">Cancelar</a>
+
+
+                                                        <button type="submit" class="btn btn-danger"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#eliminarAbonoModal{{ abono.idAbono }}">
+                                                            Eliminar
+                                                        </button>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- --MODAL PARA MOSTRAR EL DETALLE del Abono-->
+                        <div class="modal-condensed">
+                            <div class="modal fade" id="abonoModal{{ abono.idAbono }}" tabindex="-1"
+                                aria-labelledby="abonoModalLabel{{ abono.idAbono }}" aria-hidden="true">
+
+                                <div class="modal-dialog" style=" max-width: 30%;">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" style="font-weight: bold;"
+                                                id="abonoModalLabel{{ abono.numeroAbono }} ">
+                                                ABONO {{ abono.numeroAbono |default:'' }} <br>
+                                                ORDEN DE TRABAJO N°
+
+                                                {{ abono.idOrdenTrabajo.numeroOrdenTrabajo |default:'' }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+
+                                        <div class="modal-body">
+
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Cliente:</span>
+                                                        <span id="letras-modal">
+                                                            {{ abono.rutCliente.nombreCliente |upper }}
+                                                            {{ abono.rutCliente.apPaternoCliente |upper }}
+                                                            {{abono.rutCliente.apMaternoCliente|default:''|upper}}</span>
+                                                    </p>
+                                                </div>
+
+
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">RUN:</span>
+                                                        {{abono.rutCliente.rutCliente}}-{{abono.rutCliente.dvRutCliente}}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Fecha
+                                                            Abono:</span>
+                                                        {{ abono.fechaAbono |date:'d/m/Y' }}</p>
+                                                </div>
+
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Tipo de Pago del
+                                                            Abono:</span>
+                                                        {{ abono.tipoPagoAbono |default:'' }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Numero de
+                                                            Voucher:</span>
+                                                        {{ abono.numeroVoucherAbono |default:'' }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Monto
+                                                            Total:</span>
+                                                        {{ abono.idOrdenTrabajo.totalOrdenTrabajo |default:'' }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Monto
+                                                            Abonado:</span>
+                                                        {{ abono.valorAbono |default:'' }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Saldo
+                                                            Anterior:</span>
+                                                        {{ abono.saldoAnterior |default:'' }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><span class="font-weight-bold" id="texto-modal">Saldo
+                                                            Pendiente:</span>
+                                                        {{ abono.saldo |default:'' }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12 text-center">
+                                                    <hr style="width: 100%; border: 1px solid #06818e;">
+                                                </div>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Cerrar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <section>
+            <!-- PAGINACION -->
+            <div class="text-success text-left mt-3 ml-5">
+                {{ page_obj.paginator.count }} Resultado{{ page_obj.paginator.count|pluralize }}
+            </div>
+            <div class="d-flex justify-content-center">
+                <small class="d-none d-sm-inline-block text-body">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </small>
+            </div>
+
+            <div class="pagination d-flex justify-content-center">
+                <ul class="pagination">
+                    {% if is_paginated %}
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?q={{ request.GET.q }}&page=1">Primera</a></li>
+                    <li class="page-item"><a class="page-link"
+                            href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">Anterior</a></li>
+                    {% endif %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link"
+                            href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">Siguiente</a></li>
+                    <li class="page-item"><a class="page-link"
+                            href="?q={{ request.GET.q }}&page={{ page_obj.paginator.num_pages }}">Última</a></li>
+                    {% endif %}
+                    {% endif %}
+                </ul>
+            </div>
+            <!-- FIN PAGINACION -->
+        </section>
+    </div>
+</div>
+
+{% endblock content %}

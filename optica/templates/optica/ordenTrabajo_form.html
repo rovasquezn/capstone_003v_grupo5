@@ -1,5 +1,5 @@
 {% extends 'optica/base.html' %}
-<!-- {% load static crispy_forms_tags %} -->
+{% load static crispy_forms_tags %}
 {% load static %}
 {% block content%}
 
@@ -65,21 +65,20 @@
 
 
     <div id="content" class="bg-grey w-100 mb-3" style="overflow-y: auto; max-height: 100vh;">
-        <!-- <div style="overflow-y: auto; max-height: 100vh;"> -->
+
         <div class="card-center ml-4 mt-3 mb-5">
             <div class="card border-success" style="max-width: 86rem;">
                 <div class="card border border-1 shadow rounded p-3 ">
-                    <!-- <div class="scrollable-form"> -->
 
-
-                    <!-- VARIACION DE VISTA PARA CUANDO SE ENCUENTRA A CLIENTE (CAMPOS READONLY) -->
                     <form action="" method="post" class="mt-3 mb-3 modal-condensed" enctype="multipart/form-data"
                         novalidate>
                         {% csrf_token %}
 
                         {% if form.idReceta %}
+
+
                         <div class="row">
-                            <!-- VARIACION DE VISTA PARA CUANDO SE ENCUENTRA A CLIENTE (CAMPOS READONLY) -->
+                            <!-- VARIACION DE VISTA PARA CUANDO SE ENCUENTRA LA RECETA (CAMPOS READONLY) -->
                             <div class="col-md-4 ">
                             </div>
                             <div class="col-md-5 ml-1 mr-5 mt-3 font-weight-bold">
@@ -89,6 +88,10 @@
                                 <label for="numeroOrdenTrabajo">Número de Órden de Trabajo</label>
                                 {{form.numeroOrdenTrabajo}}
                             </div>
+                            <!-- <div class="col-md-2 ml-1 mt-3">
+                                <label for="idReceta"></label>
+                                {{form.idReceta}}
+                            </div> -->
                         </div>
                         <div class="row">
                             <div class="col-md-12 text-center">
@@ -288,18 +291,45 @@
                             </div>
                         </div>
 
+
+
+
+                        {% else %}
+
+                        <!-- AQUI EMPIEZA EL EDITAR -->
+
+
+                        <div class="row text-center">
+                            <!-- VARIACION DE VISTA PARA CUANDO SE ENCUENTRA A CLIENTE (CAMPOS READONLY) -->
+                            <div class="col-md-4 ">
+                            </div>
+                            <div class="font-weight-bold mb-4 mt-3">
+                                <h3>Optica Cruz - Orden de Trabajo</h3>
+                            </div>
+                        </div>
+
+                        {% endif %}
+
                         <div class="row">
                             <div class="col-md-3 mr-2 ">
                             </div>
                             <div class="col-md-2 ml-5">
                                 <label for="fechaEntregaOrdenTrabajo">Fecha de Entrega</label>
-                                <input type="date" id="fechaEntregaOrdenTrabajo" name="fechaEntregaOrdenTrabajo" {{
-                                    form.fechaEntregaOrdenTrabajo }} class="form-control">
+                                <!-- <input type="date" id="fechaEntregaOrdenTrabajo" name="fechaEntregaOrdenTrabajo" {{
+                                    form.fechaEntregaOrdenTrabajo }} class="form-control"> -->
+
+                                <input type="date" name="fechaEntregaOrdenTrabajo"
+                                    value="{% if form.fechaEntregaOrdenTrabajo.value %}{{ form.fechaEntregaOrdenTrabajo.value|date:'Y-m-d' }}{% else %}{{ ordenTrabajo.fechaEntregaOrdenTrabajo|date:'Y-m-d' }}{% endif %}"
+                                    class="form-control">
+
                             </div>
                             <div class="col-md-2">
                                 <label for="horaEntregaOrdenTrabajo">Hora de Entrega</label>
-                                <input type="time" id="horaEntregaOrdenTrabajo" name="horaEntregaOrdenTrabajo" {{
-                                    form.horaEntregaOrdenTrabajo }} class="form-control">
+                                <!-- <input type="time" id="horaEntregaOrdenTrabajo" name="horaEntregaOrdenTrabajo" {{
+                                    form.horaEntregaOrdenTrabajo }} class="form-control"> -->
+                                <input type="time" name="horaEntregaOrdenTrabajo"
+                                    value="{% if form.horaEntregaOrdenTrabajo.value %}{{ form.horaEntregaOrdenTrabajo.value|time:'H:i' }}{% else %}{{ ordenTrabajo.horaEntregaOrdenTrabajo|time:'H:i' }}{% endif %}"
+                                    class="form-control">
                             </div>
                         </div>
 
@@ -316,17 +346,20 @@
                             <div class="row col-md-1 ml-3 mt-4" style="max-width:70px;">
                                 <p style="font-weight: bold;">OD</p>
                             </div>
-                            <div style="max-width:9%;" class="form-group">
+
+                            <div style="max-width:9%;">
+                                {{ form.gradoLejosOd|as_crispy_field }}
+                            </div>
+                            <!-- <div style="max-width:9%;" class="form-group">
                                 <label for="gradoLejosOd">Grados</label>
                                 {{ form.gradoLejosOd }}
+                            </div> -->
+                            <div style="max-width:9%;">
+                                {{ form.prismaLejosOd|as_crispy_field }}
                             </div>
                             <div style="max-width:9%;">
-                                <label for="prismaLejosOd">Prisma</label>
-                                {{ form.prismaLejosOd }}
-                            </div>
-                            <div style="max-width:9%;">
-                                <label for="adicionLejosOd">Adición</label>
-                                {{ form.adicionLejosOd }}
+
+                                {{ form.adicionLejosOd|as_crispy_field }}
                             </div>
 
                             <div class="col-md-2 ml-5">
@@ -335,16 +368,15 @@
                                 <p style="font-weight: bold;">OD</p>
                             </div>
                             <div style="max-width:9%;">
-                                <label for="gradoCercaOd">Grados</label>
-                                {{ form.gradoCercaOd }}
+
+                                {{ form.gradoCercaOd |as_crispy_field }}
                             </div>
                             <div style="max-width:9%;">
-                                <label for="prismaCercaOd">Prisma</label>
-                                {{ form.prismaCercaOd }}
+
+                                {{ form.prismaCercaOd |as_crispy_field }}
                             </div>
                             <div style="max-width:9%;">
-                                <label for="adicionCercaOd">Adición</label>
-                                {{ form.adicionCercaOd }}
+                                {{ form.adicionCercaOd |as_crispy_field }}
                             </div>
                         </div>
 
@@ -353,101 +385,83 @@
                                 <p style="font-weight: bold;">OI</p>
                             </div>
                             <div style="max-width:9%;">
-                                <label for="gradoLejosOi">Grados</label>
-                                {{ form.gradoLejosOi }}
+                                {{ form.gradoLejosOi|as_crispy_field }}
                             </div>
                             <div style="max-width:9%;">
-                                <label for="prismaLejosOi">Prisma</label>
-                                {{ form.prismaLejosOi }}
+                                {{ form.prismaLejosOi |as_crispy_field }}
                             </div>
                             <div style="max-width:9%;" class="mr-5">
-                                <label for="adicionLejosOia">Adición</label>
-                                {{ form.adicionLejosOi }}
+                                {{ form.adicionLejosOi |as_crispy_field }}
                             </div>
                             <div style="max-width:10%;" class="ml-5">
-                                <label for="altura">Altura</label>
-                                {{ form.altura }}
+                                {{ form.altura |as_crispy_field }}
                             </div>
                             <div class="row col-md-1 mt-5 ml-5" style="max-width:70px;">
                                 <p style="font-weight: bold;"> OI</p>
                             </div>
                             <div style="max-width:9%;">
-                                <label for="gradoCercaOi">Grados</label>
-                                {{ form.gradoCercaOi }}
+                                {{ form.gradoCercaOi |as_crispy_field }}
                             </div>
                             <div style="max-width:9%;">
-                                <label for="prismaCercaOi">Prisma</label>
-                                {{ form.prismaCercaOi }}
+                                {{ form.prismaCercaOi |as_crispy_field }}
                             </div>
                             <div style="max-width:9%;">
-                                <label for="adicionCercaOi">Adición</label>
-                                {{ form.adicionCercaOi }}
+                                {{ form.adicionCercaOi |as_crispy_field }}
                             </div>
                         </div>
 
 
                         <div class="row">
                             <div class="ml-4" style="width:16%;">
-                                <label for="tipoCristalLejos">Tipo de Cristal</label>
-                                {{ form.tipoCristalLejos }}
+                                {{ form.tipoCristalLejos|as_crispy_field }}
                             </div>
                             <div class="ml-3" style="max-width:10%;">
-                                <label for="colorCristalLejos">Color de Cristal</label>
-                                {{ form.colorCristalLejos }}
+                                {{ form.colorCristalLejos |as_crispy_field }}
                             </div>
                             <div class="ml-3" style="max-width:10%;">
-                                <label for="valorCristalesLejos">Valor de Cristal</label>
-                                {{ form.valorCristalesLejos }}
+                                {{ form.valorCristalesLejos|as_crispy_field }}
                             </div>
 
                             <div style="width:10%;"></div>
 
                             <div class="ml-3" style="   width:16%;">
-                                <label for="tipoCristalCerca">Tipo de Cristal</label>
-                                {{ form.tipoCristalCerca }}
+                                {{ form.tipoCristalCerca |as_crispy_field }}
                             </div>
                             <div class="ml-3" style="max-width:10%;">
-                                <label for="colorCristalCerca">Color de Cristal</label>
-                                {{ form.colorCristalCerca }}
+                                {{ form.colorCristalCerca |as_crispy_field }}
                             </div>
                             <div class="ml-3" style="max-width:10%;">
-                                <label for="valorCristalesCerca">Valor de Cristal</label>
-                                {{ form.valorCristalesCerca }}
+                                {{ form.valorCristalesCerca |as_crispy_field }}
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-3 ml-1">
-                                <label for="marcoLejos">Tipo de Marco</label>
-                                {{ form.marcoLejos }}
+                                {{ form.marcoLejos |as_crispy_field }}
                             </div>
                             <div class="col-md-2 ">
-                                <label for="valorMarcoLejos">Valor Marco</label>
-                                {{ form.valorMarcoLejos }}
+                                {{ form.valorMarcoLejos |as_crispy_field }}
                             </div>
                             <div class="col-md-1">
                             </div>
                             <div class="col-md-3 ">
-                                <label for="marcoCerca">Tipo de Marco</label>
-                                {{ form.marcoCerca }}
+                                {{ form.marcoCerca |as_crispy_field }}
                             </div>
                             <div class="col-md-2 ml-1">
-                                <label for="valorMarcoCerca">Valor Marco</label>
-                                {{ form.valorMarcoCerca }}
+                                {{ form.valorMarcoCerca |as_crispy_field }}
                             </div>
                         </div>
 
 
                         <div class="row">
                             <div class="col-md-3 ml-1">
-                                <label for="laboratorioLejos">Laboratorio</label>
-                                {{ form.laboratorioLejos }}
+                                {{ form.laboratorioLejos |as_crispy_field }}
                             </div>
 
                             <div class="col-md-2">
                                 <label for="totalLejos">Sub Total</label>
-                                <input type="number" id="totalLejos" name="totalLejos"
-                                    class="form-control form-control-sm" readonly>
+                                <input type="number" id="totalLejos" name="totalLejos" value="{{form.totalLejos.value}}"
+                                    class=" form-control form-control-sm" readonly>
                             </div>
                             <script>
                                 // Selecciona los campos de los valores
@@ -470,13 +484,14 @@
                             <div class="col-md-1">
                             </div>
                             <div class="col-md-3 ">
-                                <label for="laboratorioCerca">Laboratorio</label>
-                                {{ form.laboratorioCerca }}
+
+                                {{ form.laboratorioCerca |as_crispy_field }}
                             </div>
                             <div class="col-md-2 ml-1">
                                 <label for="totalCerca">SubTotal</label>
-                                <input type="number" id="totalCerca" name="totalCerca"
-                                    class="form-control - form-control-sm" readonly>
+
+                                <input type="number" id="totalCerca" name="totalCerca" value="{{form.totalCerca.value}}"
+                                    class=" form-control form-control-sm" readonly>
                             </div>
                             <script>
                                 // Selecciona los campos de los valores
@@ -506,12 +521,81 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-3 ml-1">
-                                <label for="totalOrdenTrabajo">Valor Total</label>
+                            <div class="col-md-3 ml-1 mr-5">
+                                <label for="totalOrdenTrabajo">VALOR TOTAL</label>
                                 <input type="number" id="totalOrdenTrabajo" name="totalOrdenTrabajo"
-                                    class="form-control form-control-sm" readonly>
+                                    value="{{form.totalOrdenTrabajo.value}}" class="form-control form-control-sm"
+                                    readonly>
                             </div>
 
+                            <div class="col-md-2">
+                                <label for="estadoDelPago" class="form-label" style="width: 200px;">OPCIONES DE
+                                    PAGO</label>
+                                <br>
+                                <select class="form-select" id="estadoDelPago" name="estadoDelPago" required
+                                    style="width: 200px; height: 32px;">
+                                    <option value="Pago pendiente">PAGO PENDIENTE</option>
+                                    <option value="Pagado">PAGADO</option>
+                                    <option value="Abono">ABONADO</option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="tipoPago" class="form-label ml-4" style="width: 200px;">FORMA DE
+                                    PAGO</label>
+                                <br>
+                                <select class="form-select ml-4" id="tipoPago" name="tipoPago"
+                                    style="width: 200px; height: 32px;">
+
+                                    <option value="Efectivo">EFECTIVO</option>
+                                    <option value="Debito">DÉBITO</option>
+                                    <option value="Credito">CRÉDITO</option>
+                                    <option value="Cheque">CHEQUE</option>
+                                </select>
+
+                            </div>
+                            <script>
+                                function toggleTipoPago() {
+                                    var estadoDelPago = document.getElementById('estadoDelPago');
+                                    var tipoPago = document.getElementById('tipoPago');
+                                    if (estadoDelPago.value === 'Pago pendiente' || estadoDelPago.value === 'Abono') {
+                                        tipoPago.disabled = true;
+                                    } else {
+                                        tipoPago.disabled = false;
+                                    }
+                                }
+
+                                document.getElementById('estadoDelPago').addEventListener('change', toggleTipoPago);
+
+                                // Llama a la función al cargar la página para deshabilitar el campo si es necesario
+                                window.onload = toggleTipoPago;
+
+                            </script>
+
+                            <div class="col-md-3 ml-5 ">
+                                <label for="numeroVoucherOrdenTrabajo">NÚMERO DE DOCUMENTO</label>
+                                {{ form.numeroVoucherOrdenTrabajo }}
+                            </div>
+                            <script>
+                                const selectTipoPago = document.getElementById("tipoPago");
+                                const inputNumeroVoucher = document.getElementById("id_numeroVoucherOrdenTrabajo");
+
+                                function toggleVoucherInput() {
+                                    if (selectTipoPago.value === "Efectivo") {
+                                        inputNumeroVoucher.disabled = true;
+                                    } else {
+                                        inputNumeroVoucher.disabled = false;
+                                    }
+                                }
+
+                                // Set initial state on page load
+                                document.addEventListener("DOMContentLoaded", toggleVoucherInput);
+
+                                // Update state on change
+                                selectTipoPago.addEventListener("change", toggleVoucherInput);
+                            </script>
 
                             <script>
                                 // Selecciona los campos de los valores
@@ -541,60 +625,60 @@
                                 inputMarco4.addEventListener("input", actualizarTotal);
                             </script>
 
-
-
-
-
-
-
-
-
-
-
-
-                            <div class="col-md-3 ">
-                                <label for="tipoPago">Tipo de Pago</label>
-                                {{ form.tipoPago }}
-                            </div>
-                            <div class="col-md-3 ">
-                                <label for="numeroVoucherOrdenTrabajo">Número de Voucher</label>
-                                {{ form.numeroVoucherOrdenTrabajo }}
-                            </div>
                         </div>
+
 
                         <div class="row">
                             <div class="col-md-12">
-                                <label for="observacionOrdenTrabajo">Observaciones Orden de Trabajo</label>
-                                {{ form.observacionOrdenTrabajo }}
+
+                                {{ form.observacionOrdenTrabajo |as_crispy_field }}
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 50%; border: 1px solid #5eb9a4;">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <label for="estadoOrdenTrabajo" class="form-label"
+                                    style="font-weight: bold; width: 300px;">ESTADO ORDEN DE
+                                    TRABAJO</label>
+                                <br>
+                                <select class="form-select" id="estadoOrdenTrabajo" name="estadoOrdenTrabajo" required
+                                    style="width: 330px; height: 32px;">
+                                    <option value="OT CREADA">ORDEN DE TRABAJO CREADA</option>
+                                    <option value="OT EN PROCESO">ORDEN DE TRABAJO EN PROCESO</option>
+                                    <option value="OT PARA RETIRO">ORDEN DE TRABAJO LISTA PARA RETIRO</option>
+                                    <option value="OT ENTREGADA">ORDEN DE TRABAJO ENTREGADA</option>
+
+                                </select>
                             </div>
                         </div>
 
                         {{ form.fechaOrdenTrabajo.as_hidden }}
-                        {{ form.rutAtendedor.as_hidden }}
-                        {{ form.rutTecnico.as_hidden }}
-                        {{ form.rutAdministrador.as_hidden }}
 
 
-                        {% else %}
-                        <!-- EDITAR -->
+                        <!-- EDITAR
 
-                        <div class="row text-center">
-                            <!-- VARIACION DE VISTA PARA CUANDO SE ENCUENTRA A CLIENTE (CAMPOS READONLY) -->
-                            <div class="col-md-4 ">
+                        <div class="row text-center"> -->
+                        <!-- VARIACION DE VISTA PARA CUANDO SE ENCUENTRA A CLIENTE (CAMPOS READONLY) -->
+                        <!-- <div class="col-md-4 ">
                             </div>
                             <div class="font-weight-bold mb-4 mt-3">
                                 <h3>Optica Cruz - Orden de Trabajo</h3>
-                            </div>
+                            </div> -->
 
-                            <!-- <div class="col-md-2 ml-1 mt-3 form-group">
+                        <!-- <div class="col-md-2 ml-1 mt-3 form-group">
                                     <label for="numeroOrdenTrabajo">Número de Órden de Trabajo</label>
                                     <input type="text" name="numeroOrdenTrabajo"
                                         value="{{ ordenTrabajo.numeroOrdenTrabajo }}" readonly class="form-control">
                                 </div> -->
 
 
-
-                        </div>
+                        <!-- </div>
 
 
                         <div class="row">
@@ -725,12 +809,14 @@
                                     value="{{ form.tipoCristalLejos.value|default:'' }}">
                             </div>
                             <div style="max-width:10%;" class="form-group">
-                                <label for="colorCristalLejos" class="form-label">Color de Cristal</label>
+                                <label for="colorCristalLejos" class="form-label">Color de
+                                    Cristal</label>
                                 <input type="text" name="colorCristalLejos" class="form-control"
                                     value="{{ form.colorCristalLejos.value|default:'' }}">
                             </div>
                             <div class="ml-3 mr-4" style="max-width:10%;" class="form-group">
-                                <label for="valorCristalesLejos" class="form-label">Valor de Cristal</label>
+                                <label for="valorCristalesLejos" class="form-label">Valor de
+                                    Cristal</label>
                                 <input type="text" name="valorCristalesLejos" class="form-control"
                                     value="{{ form.valorCristalesLejos.value|default:'' }}">
                             </div>
@@ -742,12 +828,14 @@
                                     value="{{ form.tipoCristalCerca.value|default:'' }}">
                             </div>
                             <div style="max-width:10%;" class="form-group">
-                                <label for="colorCristalCerca" class="form-label">Color de Cristal</label>
+                                <label for="colorCristalCerca" class="form-label">Color de
+                                    Cristal</label>
                                 <input type="text" name="colorCristalCerca" class="form-control"
                                     value="{{ form.colorCristalCerca.value|default:'' }}">
                             </div>
                             <div class="ml-3" style="max-width:10%;" class="form-group">
-                                <label for="valorCristalesCerca" class="form-label">Valor de Cristal</label>
+                                <label for="valorCristalesCerca" class="form-label">Valor de
+                                    Cristal</label>
                                 <input type="text" name="valorCristalesCerca" class="form-control"
                                     value="{{ form.valorCristalesCerca.value|default:'' }}">
                             </div>
@@ -786,14 +874,67 @@
                                     value="{{ form.laboratorioLejos.value|default:'' }}">
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-2">
+                                <label for="totalLejos">Sub Total</label>
+                                <input type="number" id="totalLejos" name="totalLejos"
+                                    class="form-control form-control-sm" readonly>
                             </div>
+
+                            <script> -->
+                        <!-- // Selecciona los campos de los valores
+                                const inputCristales5 = document.getElementById("id_valorCristalesLejos");
+                                const inputMarco5 = document.getElementById("id_valorMarcoLejos");
+                                const inputTotal5 = document.getElementById("totalLejos");
+
+                                // Función para actualizar el valor total en tiempo real
+                                function actualizarTotal() {
+                                    const valorCristales = parseFloat(inputCristales5.value) || 0;
+                                    const valorMarco = parseFloat(inputMarco5.value) || 0;
+                                    inputTotal5.value = valorCristales + valorMarco;
+                                }
+
+                                // Eventos para recalcular el valor total al cambiar los valores
+                                inputCristales5.addEventListener("input", actualizarTotal);
+                                inputMarco5.addEventListener("input", actualizarTotal);
+                            </script> -->
+
+
+
+
+                        <!-- <div class="col-md-1">
+                            </div>
+
                             <div class="col-md-3 ml-4 form-group">
                                 <label for="laboratorioCerca" class="form-label">Laboratorio</label>
                                 <input type="text" name="laboratorioCerca" class="form-control"
                                     value="{{ form.laboratorioCerca.value|default:'' }}">
                             </div>
 
+
+                            <div class="col-md-2 ml-1">
+                                <label for="totalCerca">SubTotal</label>
+                                <input type="number" id="totalCerca" name="totalCerca"
+                                    class="form-control - form-control-sm" readonly>
+                            </div>
+                            <script> -->
+                        <!-- // Selecciona los campos de los valores
+                                const inputCristales6 = document.getElementById("id_valorCristalesCerca");
+                                const inputMarco6 = document.getElementById("id_valorMarcoCerca");
+                                const inputTotal6 = document.getElementById("totalCerca");
+
+                                // Función para actualizar el valor total en tiempo real
+                                function actualizarTotal() {
+                                    const valorCristales2 = parseFloat(inputCristales6.value) || 0;
+                                    const valorMarco2 = parseFloat(inputMarco6.value) || 0;
+                                    inputTotal6.value = valorCristales6 + valorMarco6;
+                                }
+
+                                // Eventos para recalcular el valor total al cambiar los valores
+                                inputCristales6.addEventListener("input", actualizarTotal);
+                                inputMarco6.addEventListener("input", actualizarTotal);
+                            </script> -->
+
+                        <!-- 
                         </div>
 
                         <div class="row">
@@ -802,45 +943,233 @@
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="row"> -->
 
-                            <div class="col-md-3 form-group">
-                                <label for="tipoPago" class="form-label">Tipo de Pago</label>
-                                <input type="text" name="tipoPago" class="form-control"
-                                    value="{{ form.tipoPago.value|default:'' }}">
+                        <!-- 
+                            <div class="col-md-3 ml-1 mr-5">
+                                <label for="totalOrdenTrabajo">VALOR TOTAL</label>
+                                <input type="text" id="totalOrdenTrabajo" name="totalOrdenTrabajo"
+                                    class="form-control form-control-sm" value="{{ form.totalOrdenTrabajo.value }}"
+                                    readonly>
+                            </div> -->
+
+
+
+                        <!-- <div class="col-md-3 ml-1 mr-5">
+                                <label for="totalOrdenTrabajo">VALOR TOTAL</label>
+                                <input type="number" id="totalOrdenTrabajo" name="totalOrdenTrabajo"
+                                    class="form-control form-control-sm" readonly>
                             </div>
-                            <div class="col-md-3 form-group">
-                                <label for="numeroVoucherOrdenTrabajo">Número de Voucher</label>
-                                <input type="text" name="numeroVoucherOrdenTrabajo" class="form-control"
-                                    value="{{ form.numeroVoucherOrdenTrabajo.value|default:'' }}">
+
+                            <div class="col-md-2">
+                                <label for="estadoDelPago" class="form-label" style="width: 200px;">OPCIONES DE
+                                    PAGO</label>
+                                <br>
+                                <select class="form-select" id="estadoDelPago" name="estadoDelPago" required
+                                    style="width: 200px; height: 32px;">
+                                    <option value="Pago pendiente">PAGO PENDIENTE</option>
+                                    <option value="Pagado">PAGADO</option>
+                                    <option value="Abono">ABONADO</option>
+                                </select>
                             </div>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    var estadoDelPago = document.getElementById('estadoDelPago');
+                                    var valorGuardado = "{{ form.instance.estadoDelPago }}";  // Obtén el valor guardado desde el servidor
+
+                                    // Establece el valor seleccionado en el campo select
+                                    for (var i = 0; i < estadoDelPago.options.length; i++) {
+                                        if (estadoDelPago.options[i].value === valorGuardado) {
+                                            estadoDelPago.options[i].selected = true;
+                                            break;
+                                        }
+                                    }
+                                });
+                            </script> -->
+
+
+
+                        <!-- <div class="col-md-2">
+                                <label for="tipoPago" class="form-label ml-4" style="width: 200px;">FORMA DE
+                                    PAGO</label>
+                                <br>
+                                <select class="form-select ml-4" id="tipoPago" name="tipoPago"
+                                    style="width: 200px; height: 32px;">
+
+                                    <option value="Efectivo">EFECTIVO</option>
+                                    <option value="Debito">DÉBITO</option>
+                                    <option value="Credito">CRÉDITO</option>
+                                    <option value="Cheque">CHEQUE</option>
+                                </select>
+
+                            </div>
+
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    var estadoDelPago = document.getElementById('estadoDelPago');
+                                    var valorGuardadoEstado = "{{ form.instance.estadoDelPago }}";  // Obtén el valor guardado desde el servidor
+
+                                    // Establece el valor seleccionado en el campo select estadoDelPago
+                                    for (var i = 0; i < estadoDelPago.options.length; i++) {
+                                        if (estadoDelPago.options[i].value === valorGuardadoEstado) {
+                                            estadoDelPago.options[i].selected = true;
+                                            break;
+                                        }
+                                    }
+
+                                    var tipoPago = document.getElementById('tipoPago');
+                                    var valorGuardadoTipo = "{{ form.instance.tipoPago }}";  // Obtén el valor guardado desde el servidor
+
+                                    // Establece el valor seleccionado en el campo select tipoPago
+                                    for (var i = 0; i < tipoPago.options.length; i++) {
+                                        if (tipoPago.options[i].value === valorGuardadoTipo) {
+                                            tipoPago.options[i].selected = true;
+                                            break;
+                                        }
+                                    }
+                                });
+                            </script>
+
+                            <script>
+                                function toggleTipoPago() {
+                                    var estadoDelPago = document.getElementById('estadoDelPago');
+                                    var tipoPago = document.getElementById('tipoPago');
+                                    if (estadoDelPago.value === 'Pago pendiente' || estadoDelPago.value === 'Abono') {
+                                        tipoPago.disabled = true;
+                                    } else {
+                                        tipoPago.disabled = false;
+                                    }
+                                }
+
+                                document.getElementById('estadoDelPago').addEventListener('change', toggleTipoPago);
+
+                                // Llama a la función al cargar la página para deshabilitar el campo si es necesario
+                                window.onload = toggleTipoPago;
+
+                            </script>
+
+
+                            <div class="col-md-3 ml-5 ">
+                                <label for="numeroVoucherOrdenTrabajo">NÚMERO DE DOCUMENTO</label>
+                                {{ form.numeroVoucherOrdenTrabajo }}
+                            </div>
+
+
+                            <script>
+                                const selectTipoPago2 = document.getElementById("tipoPago");
+                                const inputNumeroVoucher2 = document.getElementById("id_numeroVoucherOrdenTrabajo");
+
+                                function toggleVoucherInput() {
+                                    if (selectTipoPago2.value === "Efectivo") {
+                                        inputNumeroVoucher2.disabled = true;
+                                    } else {
+                                        inputNumeroVoucher2.disabled = false;
+                                    }
+                                }
+
+                                // Set initial state on page load
+                                document.addEventListener("DOMContentLoaded", toggleVoucherInput);
+
+                                // Update state on change
+                                selectTipoPago.addEventListener("change", toggleVoucherInput);
+                            </script>
+
+                            <script>
+                                // Selecciona los campos de los valores
+                                const inputCristales7 = document.getElementById("id_valorCristalesCerca");
+                                const inputMarco7 = document.getElementById("id_valorMarcoCerca");
+                                const inputCristales8 = document.getElementById("id_valorCristalesLejos");
+                                const inputMarco8 = document.getElementById("id_valorMarcoLejos");
+                                const inputTotal8 = document.getElementById("totalOrdenTrabajo");
+
+
+
+
+                                // Función para actualizar el valor total en tiempo real
+                                function actualizarTotal() {
+                                    const valorCristales7 = parseFloat(inputCristales7.value) || 0;
+                                    const valorMarco7 = parseFloat(inputMarco7.value) || 0;
+                                    const valorCristales8 = parseFloat(inputCristales8.value) || 0;
+                                    const valorMarco8 = parseFloat(inputMarco8.value) || 0;
+
+                                    inputTotal8.value = valorCristales7 + valorMarco7 + valorCristales8 + valorMarco8;
+                                }
+
+                                // Eventos para recalcular el valor total al cambiar los valores
+                                inputCristales7.addEventListener("input", actualizarTotal);
+                                inputMarco7.addEventListener("input", actualizarTotal);
+                                inputCristales8.addEventListener("input", actualizarTotal);
+                                inputMarco8.addEventListener("input", actualizarTotal);
+                            </script>
+
                         </div>
 
                         <div class="row">
                             <div class="col-md-12 form-group">
-                                <label for="observacionOrdenTrabajo">Observaciones Orden de Trabajo</label>
+                                <label for="observacionOrdenTrabajo">OBSERVACIONES ORDEN DE TRABAJO</label>
                                 <input type="text" name="observacionOrdenTrabajo" class="form-control"
                                     value=" {{ form.observacionOrdenTrabajo.value|default:''}}">
                             </div>
                         </div>
+
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 50%; border: 1px solid #5eb9a4;">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <label for="estadoOrdenTrabajo" class="form-label"
+                                    style="font-weight: bold; width: 300px;">ESTADO ORDEN DE
+                                    TRABAJO</label>
+                                <br>
+                                <select class="form-select" id="estadoOrdenTrabajo" name="estadoOrdenTrabajo" required
+                                    style="width: 330px; height: 32px;">
+                                    <option value="OT CREADA">ORDEN DE TRABAJO CREADA</option>
+                                    <option value="OT EN PROCESO">ORDEN DE TRABAJO EN PROCESO</option>
+                                    <option value="OT PARA RETIRO">ORDEN DE TRABAJO LISTA PARA RETIRO</option>
+                                    <option value="OT ENTREGADA">ORDEN DE TRABAJO ENTREGADA</option>
+
+                                </select>
+                            </div>
+                        </div>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                var estadoOrdenTrabajo = document.getElementById('estadoOrdenTrabajo');
+                                var valorGuardadoEstadoOT = "{{ form.instance.estadoOrdenTrabajo }}";  // Obtén el valor guardado desde el servidor
+
+                                // Establece el valor seleccionado en el campo select estadoDelPago
+                                for (var i = 0; i < estadoOrdenTrabajo.options.length; i++) {
+                                    if (estadoOrdenTrabajo.options[i].value === valorGuardadoEstadoOT) {
+                                        estadoOrdenTrabajo.options[i].selected = true;
+                                        break;
+                                    }
+                                }
+
+                            });
+                        </script> -->
+
 
                         <!-- {{ form.fechaOrdenTrabajo.as_hidden }} -->
                         <!-- {{ form.rutAtendedor.as_hidden }}
                             {{ form.rutTecnico.as_hidden }}
                             {{ form.rutAdministrador.as_hidden }} -->
 
-                        {% endif %}
+
 
 
                         <div class="mt-3 mb-3">
                             <a href="{% url 'ordenTrabajo_list' %}" class="btn btn-secondary mr-3">Cancelar</a>
-                            <button class="btn btn-success">Guardar Orden de Trabajo</button>
+                            <button type="submit" class="btn btn-success">Guardar Orden de
+                                Trabajo</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-        <!-- </div> -->
+
     </div>
 </div>
 

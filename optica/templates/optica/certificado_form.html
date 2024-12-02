@@ -1,0 +1,319 @@
+{% extends 'optica/base.html' %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+
+<!-- Page Content -->
+<div id="content" class="bg-grey w-100" style="overflow-y: auto; max-height: 100vh;">
+    <div class="container">
+        <h1 class="font-weight-bold mb-0">
+            {% if cetificado %}
+            Editar Certificado
+            {% else %}
+            Generar Certificado</h1>
+
+        <!-- Buscar Orden de Trabajo-->
+        <form method="get" action="" style="max-width: 500px;">
+            <div class="input-group mb-2 fixed">
+                <input type="text" class="form-control" id="id_orden_trabajo" name="id_orden_trabajo"
+                    placeholder="Ingrese ID de la Orden de Trabajo" value="{{ request.GET.id_orden_trabajo }}">
+                <button type="submit" class="btn btn-primary">Buscar Orden de Trabajo</button>
+            </div>
+        </form>
+
+        <!-- Mostrar mensajes como toasts -->
+        <div id="mensajeConfirmacion" class="alert" style="position: fixed; top:135px; right: 450px; min-width: 250px;">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="toast align-items-center text-bg-success{{ message.tags }} border-0" style="font-weight: bold;"
+                role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ message }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Incluir el script de Bootstrap para inicializar los toasts -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Inicializa los toasts
+                var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+                var toastList = toastElList.map(function (toastEl) {
+                    return new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 }) // 3 segundos de duración
+                })
+                toastList.forEach(toast => toast.show()) // Mostrar todos los toasts
+            });
+        </script>
+
+        {% endif %}
+    </div>
+
+
+    <div id="content" class="bg-grey w-100" style="overflow-y: auto; max-height: 100vh;">
+        <div style="display: flex; justify-content: center; align-items: center;" class="mt-3">
+            <div class="card border-success mt-2 mb-5" style="width: 50rem;">
+                <div class="card border border-1 shadow rounded p-3 ">
+                    <div class="mt-3 mb-3 modal-condensed">
+                        {% csrf_token %}
+                        {% if idOrdenTrabajo %}
+
+                        <div class="row">
+                            <div class="col-md-3 ml-3">
+                                <img src="{% static '/images/Optica_Cruz_Celeste2.png' %}"
+                                    alt="Descripción de la imagen" class="ml-4 mt-3"
+                                    style="width: 150px; height: auto;">
+                            </div>
+                            <div class="col-md-5 text-center mb-5 mt-5 font-weight-bold">
+                                <h5>Sociedad Óptica Cruz Limitada </h5>
+                                <br>
+                                RUT: 76.367.312-K
+                                <br>
+                                Condell 1170 - Valparaíso
+                                <br>
+                                Fono: 32-2213097
+                            </div>
+                        </div>
+
+                        <div class="text-align-center">
+                            <div class="col-md-12 text-center mt-5 font-weight-bold">
+                                <h2>
+                                    CERTIFICADO
+                                </h2>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <hr style="width: 50%; border: 1px solid #5eb9a4;">
+                                </div>
+                            </div>
+                            <br>
+                            <div class="col-md-10 text-uppercase text-center mt-3 ml-5">
+                                <h6>
+                                    Sociedad Óptica Cruz Limitada, certifica que nuestro cliente,
+
+                                    <strong>{{ orden_trabajo.idReceta.rutCliente.nombreCliente }}
+                                        {{orden_trabajo.idReceta.rutCliente.apPaternoCliente}}
+                                        {{orden_trabajo.idReceta.rutCliente.apMaternoCliente |default:''}}</strong>,
+                                    RUN
+                                    <strong>{{orden_trabajo.idReceta.rutCliente.rutCliente|intcomma}}
+                                        -{{orden_trabajo.idReceta.rutCliente.dvRutCliente}}</strong>,
+
+                                    con fecha
+                                    <span id="fecha"></span>, solicitó este certificado por la confección de lentes
+
+                                    ópticos según <strong>receta médica N°
+                                        {{ orden_trabajo.idReceta.numeroReceta|default:'(sin número)' }}</strong>
+                                    y asociado a la <strong>orden de trabajo
+                                        N° {{orden_trabajo.numeroOrdenTrabajo}}</strong>
+                                    con los siguientes valores:
+                                </h6>
+                            </div>
+                            <br>
+
+                            <script>
+                                // Obtener la fecha actual
+                                var fechaActual = new Date();
+                                var dia = fechaActual.getDate();
+                                var mes = fechaActual.getMonth() + 1; // Los meses empiezan desde 0
+                                var anio = fechaActual.getFullYear();
+
+                                // Formatear la fecha en formato dd/mm/yyyy
+                                var fechaFormateada = dia + '/' + mes + '/' + anio;
+
+                                // Mostrar la fecha en el elemento con id "fecha"
+                                document.getElementById('fecha').textContent = fechaFormateada;
+                            </script>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 80%; border: 1px solid #5eb9a4;">
+                            </div>
+                        </div>
+
+                        <style>
+                            .table-condensed {
+                                font-size: 12px;
+                                /* Ajusta este valor según lo necesites */
+                            }
+
+                            .table-condensed th,
+                            .table-condensed td {
+                                padding-top: 5px;
+                                padding-bottom: 5px;
+                                /* Reduce el espacio entre celdas */
+                            }
+                        </style>
+
+                        <div class="container-fluid col-lg-9 mt-3">
+                            <div class="card border border-1 shadow rounded p-3 ">
+
+                                <table class="table table-condensed table-striped mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">LEJOS</th>
+                                            <th scope="col">CERCA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Valor Marco: ${{ orden_trabajo.valorMarcoLejos|default:0|intcomma }}
+                                            </td>
+                                            <td>Valor Marco: ${{ orden_trabajo.valorMarcoCerca|default:0|intcomma }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Valor Cristal:
+                                                ${{orden_trabajo.valorCristalesLejos|default:0|intcomma}}
+                                            </td>
+                                            <td>Valor Cristal:
+                                                ${{orden_trabajo.valorCristalesCerca|default:0|intcomma}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Sub-Total: ${{ orden_trabajo.totalLejos|default:0|intcomma }}</td>
+                                            <td>Sub-Total: ${{ orden_trabajo.totalCerca|default:0|intcomma }}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td style="text-align: center" class="font-weight-bold text-center">
+                                                VALOR TOTAL: ${{ orden_trabajo.totalOrdenTrabajo|default:0|intcomma}}
+                                            </td>
+
+                                            {% if orden_trabajo.numeroVoucherOrdenTrabajo %}
+                                            <td class="font-weight-bold text-center">
+                                                NÚMERO VOUCHER:
+                                                {{orden_trabajo.numeroVoucherOrdenTrabajo}}
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 90%; border: 1px solid #5eb9a4;">
+                            </div>
+                        </div>
+
+                        <br><br><br><br><br><br>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 30%; border: 1px solid #5eb9a4;">
+                                FIRMA Y TIMBRE
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 text-center">
+                                <button class="btn btn-success" id="generarPdf" onclick="generarPdf()"><i
+                                        class="bi bi-file-earmark-pdf"></i>
+                                    Descargar PDF</button>
+
+                                <script>
+                                    document.getElementById("generarPdf").addEventListener("click", function () {
+                                        fetch("{% url 'generar_certificado' %}?id_orden_trabajo={{ orden_trabajo.idOrdenTrabajo }}")
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                var { jsPDF } = window.jspdf;
+                                                var pdf = new jsPDF('p', 'pt', 'a4');
+                                                var source = document.body;
+                                                pdf.html(source, {
+                                                    callback: function (pdf) {
+                                                        var pdfName = "certificado_" + data.idOrdenTrabajo + ".pdf";
+                                                        pdf.save(pdfName);
+                                                    },
+                                                    x: 15,
+                                                    y: 15,
+                                                    width: 170
+                                                });
+                                            })
+                                            .catch(error => console.error('Error:', error));
+                                    });
+                                </script>
+                            </div>
+                            <div class="col-md-6 text-center">
+                                <button class="btn btn-success" id="enviarCertificado"><i class="bi bi-envelope"></i>
+                                    Enviar Certificado por Correo</button>
+                            </div>
+
+
+                            <script>
+                                document.getElementById("enviarCertificado").addEventListener("click", function () {
+                                    var { jsPDF } = window.jspdf;
+                                    var pdf = new jsPDF();
+                                    var source = document.body; // Cambia esto para capturar el contenido específico que deseas
+                                    pdf.html(source, {
+                                        callback: function (pdf) {
+                                            var file = pdf.output("blob");
+                                            var formData = new FormData();
+                                            formData.append("certificado", file);
+                                            formData.append("emailCliente", "{{ orden_trabajo.idReceta.emailCliente }}");
+                                            formData.append("nombreCliente", "{{ orden_trabajo.idReceta.nombreCliente }}");
+                                            formData.append("numeroOrdenTrabajo", "{{ orden_trabajo.numeroOrdenTrabajo }}");
+                                            formData.append("idOrdenTrabajo", "{{ orden_trabajo.idOrdenTrabajo }}");
+
+                                            var xhr = new XMLHttpRequest();
+                                            xhr.open("POST", "{% url 'enviar_certificado_pdf' %}", true);
+                                            xhr.onload = function () {
+                                                if (xhr.status === 200) {
+                                                    alert("Certificado enviado exitosamente");
+                                                } else {
+                                                    alert("Error al enviar certificado");
+                                                }
+                                            };
+                                            xhr.send(formData);
+                                        },
+                                        x: 15,
+                                        y: 15,
+                                        width: 170
+                                    });
+                                });
+                            </script>
+                        </div>
+                        {% else %}
+                        <div class="row">
+                            <div class="col-md-3 ml-3">
+                                <img src="{% static '/images/Optica_Cruz_Celeste2.png' %}"
+                                    alt="Descripción de la imagen" class="ml-4 mt-3"
+                                    style="width: 150px; height: auto;">
+                            </div>
+                            <div class="col-md-5 text-center mb-5 mt-5 font-weight-bold">
+                                <h5>Sociedad Óptica Cruz Limitada </h5>
+                                <br>
+                                RUT: 76.367.312-K
+                                <br>
+                                Condell 1170 - Valparaíso
+                                <br>
+                                Fono: 32-2213097
+                            </div>
+                        </div>
+
+                        <div class="text-align-center">
+                            <div class="col-md-12 text-center mt-5 font-weight-bold">
+                                <h2>
+                                    CERTIFICADO
+                                </h2>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <hr style="width: 50%; border: 1px solid #5eb9a4;">
+                                </div>
+                            </div>
+                            <br>
+
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock content %}

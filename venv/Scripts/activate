@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\dkn_d\OneDrive - Fundacion Instituto Profesional Duoc UC\8° SEMESTRE\CAPSTONE\Github\Optica_Cruz_version1.0\venv"
+VIRTUAL_ENV="C:\Users\dkn_d\Desktop\FUSION\Originales\DEREK\Optica_Cruz_versionDEREK\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

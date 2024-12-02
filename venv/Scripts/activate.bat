@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\dkn_d\OneDrive - Fundacion Instituto Profesional Duoc UC\8° SEMESTRE\CAPSTONE\Github\Optica_Cruz_version1.0\venv
+set VIRTUAL_ENV=C:\Users\dkn_d\Desktop\FUSION\Originales\DEREK\Optica_Cruz_versionDEREK\venv
 
 if not defined PROMPT set PROMPT=$P$G
 

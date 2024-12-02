@@ -87,11 +87,9 @@
                             <th scope="col">Nombre Cliente</th>
                             <th scope="col">Numero de Receta</th>
                             <th scope="col">Fecha Receta</th>
-
                             <th scope="col">Tipo Lente</th>
                             <th scope="col">Institucion</th>
                             <th scope="col">Doctor Oftalmologo</th>
-                            <th scope="col">Observaciones</th>
                             <th scope="col">Imagen</th>
                         </tr>
                     </thead>
@@ -109,7 +107,7 @@
                             <td class="text-uppercase">{{ receta.tipoLente |default:'-' }}</td>
                             <td class="text-uppercase">{{ receta.institucion |default:'-' }}</td>
                             <td class="text-uppercase">{{ receta.doctorOftalmologo |default:'-' }}</td>
-                            <td class="text-uppercase">{{ receta.observacionReceta |default:'-' }}</td>
+
                             <!-- Imagen en la tabla con enlace para abrir el modal -->
                             <td>
                                 {% if receta.imagenReceta %}
@@ -117,7 +115,7 @@
                                 <img src="{{ receta.imagenReceta.url }}" height="40" data-bs-toggle="modal"
                                     data-bs-target="#imagenModal-{{ receta.idReceta }}" style="cursor: pointer;" />
                                 {% else %}
-                                <span>Imagen no disponible</span>
+                                <span>IMAGEN NO DISPONIBLE</span>
                                 {% endif %}
                             </td>
 
@@ -153,14 +151,19 @@
                                         <i class="bi bi-pencil"></i> <!-- Icono de lápiz para editar -->
                                     </a>
 
+                                    <a href="{% url 'ordenTrabajo_new' %}?idReceta={{ receta.idReceta }}&q={{ receta.idReceta }}"
+                                        class="btn btn-warning">
+                                        <i class="icon ion-md-hammer"></i><!-- Icono de moneda -->
+                                    </a>
+
                                     <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                         data-bs-target="#eliminarRecetaModal{{ receta.idReceta }}">
                                         <i class="bi bi-trash"></i> <!-- Icono de basura para eliminar -->
                                     </button>
-
-
                                 </div>
-                                <!-- --MODAL PARA ELIMINAR ORDEN DE TRABAJO -->
+
+
+                                <!-- --MODAL PARA ELIMINAR RECETA -->
                                 <a data-bs-toggle="modal" data-bs-target="#eliminarRecetaModal{{ receta.idReceta }}">
 
                                     <div class="modal fade" id="eliminarRecetaModal{{ receta.idReceta  }}" tabindex="-1"
@@ -178,7 +181,12 @@
                                                     <span class="font-weight-bold text-center">
                                                         <h5>
                                                             ¿Está seguro de eliminar la Receta
-                                                            <br>Número {{receta.numeroReceta|default:''}}?
+                                                            <br>
+                                                            {% if receta.numeroReceta %} Número
+                                                            {{ receta.numeroReceta }}
+                                                            {% else %}ID {{ receta.idReceta }}
+                                                            {% endif %}
+                                                            ?
                                                         </h5>
                                                     </span>
                                                     <form method="post" class="mt-3 text-center"
@@ -194,7 +202,7 @@
                                                             Eliminar
                                                         </button>
                                                     </form>
-                                                    </form>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -203,7 +211,7 @@
                             </td>
                         </tr>
 
-                        <!-- --MODAL PARA MOSTRAR EL DETALLE -->
+                        <!-- --MODAL PARA MOSTRAR EL DETALLE de la Receta -->
                         <div class="modal-condensed">
                             <div class="modal fade" id="recetaModal{{ receta.idReceta }}" tabindex="-1"
                                 aria-labelledby="recetaModalLabel{{ receta.idReceta }}" aria-hidden="true">
@@ -228,7 +236,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold" id="texto-modal">Cliente:</span>
-                                                        <span id="letras-modal">{{ receta.nombreCliente |upper }}
+                                                        <span>{{ receta.nombreCliente |upper }}
                                                             {{ receta.apPaternoCliente |upper }}
                                                             {{ receta.apMaternoCliente|default:'' |upper }}</span>
                                                     </p>
@@ -407,7 +415,6 @@
                                                 </div>
                                             </div>
 
-
                                             <div class="row">
                                                 <div class="col" style="width: 12%;">
                                                     <p><span class="font-weight-bold" id="texto-modal">OI</span></p>
@@ -431,7 +438,6 @@
                                                 </div>
                                             </div>
 
-
                                             <div class="row">
                                                 <div class="col-md-12 text-center">
                                                     <hr style="width: 100%; border: 1px solid #06818e;">
@@ -446,20 +452,21 @@
                                                 </div>
                                             </div>
 
-
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <p><span class="font-weight-bold"
                                                             id="texto-modal">Institución:</span>
                                                         {{ receta.institucion|default:""|upper }}</p>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <p><span class="font-weight-bold" id="texto-modal">
-                                                            Doctor(a) Oftalmología:</span>
+
+                                            </div>
+                                            <div claass="row">
+                                                <div class="col-md-12">
+                                                    <p><span class="font-weight-bold" id="texto-modal"> Doctor(a)
+                                                            Oftalmología:</span>
                                                         {{ receta.doctorOftalmologo |default:""|upper }}</p>
                                                 </div>
                                             </div>
-                                            <!-- Observaciones pueden ir en una sola fila ocupando ambas columnas -->
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <p><span class="font-weight-bold"
@@ -483,70 +490,36 @@
             </div>
         </div>
 
-
-        <div class="text-success text-left mt-3 ml-5">
-            {{ page_obj.paginator.count }} Resultado{{ page_obj.paginator.count|pluralize }}
-
-
-        </div>
-
-        <div class="d-flex justify-content-center">
-            <small class="d-none d-sm-inline-block text-body">
-                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-            </small>
-        </div>
-
         <section>
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
+            <!-- PAGINACION -->
+            <div class="text-success text-left mt-3 ml-5">
+                {{ page_obj.paginator.count }} Resultado{{ page_obj.paginator.count|pluralize }}
+            </div>
+            <div class="d-flex justify-content-center">
+                <small class="d-none d-sm-inline-block text-body">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </small>
+            </div>
+
+            <div class="pagination d-flex justify-content-center">
+                <ul class="pagination">
+                    {% if is_paginated %}
                     {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="{% url 'receta_list' %}?page={{ page_obj.previous_page_number }}"
-                            aria-label="Anterior">
-                            <span aria-hidden="true">
-                                Anterior </span>
-                        </a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" aria-label="Anterior">
-                            <span aria-hidden="true">
-                                Anterior </span>
-                        </a>
-                    </li>
+                    <li class="page-item"><a class="page-link" href="?q={{ request.GET.q }}&page=1">Primera</a></li>
+                    <li class="page-item"><a class="page-link"
+                            href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">Anterior</a></li>
                     {% endif %}
-
-
-
-
-                    {% for page in page_obj.adjusted_elided_pages %}
-                    <li class="page-item {% if page_obj.number == page %}active{% endif %}">
-                        <a class="page-link" href="{% url 'receta_list' %}?page={{ page }}">
-                            {{ page }}
-                        </a>
-                    </li>
-                    {% endfor %}
 
                     {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="{% url 'receta_list' %}?page={{ page_obj.next_page_number }}"
-                            aria-label="Siguiente">
-                            <span aria-hidden="true">
-                                Siguiente
-                            </span>
-                        </a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" aria-label="Siguiente">
-                            <span aria-hidden="true">
-                                Siguiente
-                            </span>
-                        </a>
-                    </li>
+                    <li class="page-item"><a class="page-link"
+                            href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">Siguiente</a></li>
+                    <li class="page-item"><a class="page-link"
+                            href="?q={{ request.GET.q }}&page={{ page_obj.paginator.num_pages }}">Última</a></li>
+                    {% endif %}
                     {% endif %}
                 </ul>
-            </nav>
+            </div>
+            <!-- FIN PAGINACION -->
         </section>
     </div>
 </div>

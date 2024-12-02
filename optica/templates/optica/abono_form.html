@@ -1,0 +1,291 @@
+{% extends 'optica/base.html' %}
+{% load crispy_forms_tags %}
+
+{% load humanize %}
+{% load static %}
+{% block content%}
+
+
+
+<!-- Page Content -->
+<div id="content" class="bg-grey w-100" style="overflow-y: auto; max-height: 100vh;">
+
+    <section class="bg-light py-3">
+        <div class="container">
+
+            <h1 class="font-weight-bold mb-0">
+                {% if abono %}
+                Editar Abono
+                {% else %}
+                Ingreso de Abono</h1>
+
+            <!-- Buscar Orde de Trabajo-->
+            <form method="get" action="" style="max-width: 500px;">
+                <div class="input-group mb-2 fixed">
+                    <input type="text" class="form-control" id="id_orden_trabajo" name="id_orden_trabajo"
+                        placeholder="Ingrese ID de la Orden de Trabajo" value="{{ request.GET.id_orden_trabajo }}">
+                    <button type="submit" class="btn btn-primary">Buscar Orden de Trabajo</button>
+                </div>
+            </form>
+
+            <!-- Mostrar mensajes como toasts -->
+            <div id="mensajeConfirmacion" class="alert"
+                style="position: fixed; top:135px; right: 450px; min-width: 250px;">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="toast align-items-center text-bg-success{{ message.tags }} border-0"
+                    style="font-weight: bold;" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            {{ message }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                            aria-label="Close"></button>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Incluir el script de Bootstrap para inicializar los toasts -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Inicializa los toasts
+                    var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+                    var toastList = toastElList.map(function (toastEl) {
+                        return new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 }) // 3 segundos de duración
+                    })
+                    toastList.forEach(toast => toast.show()) // Mostrar todos los toasts
+                });
+            </script>
+
+
+            {% endif %}
+        </div>
+    </section>
+
+    <div id="content" class="bg-grey w-100" style="overflow-y: auto; max-height: 100vh;">
+
+        <div style="display: flex; justify-content: center; align-items: center;" class="mt-3">
+
+            <div class="card border-success mt-2 mb-5" style="width: 50rem;">
+                <div class="card border border-1 shadow rounded p-3 ">
+
+                    <form action="" method="post" class="mt-3 mb-3 modal-condensed " enctype="multipart/form-data"
+                        novalidate>
+                        {% csrf_token %}
+                        {% if form.idOrdenTrabajo %}
+                        {{ form.non_field_errors }}
+
+                        <div class="row">
+                            <!-- VARIACION DE VISTA PARA CUANDO SE ENCUENTRA LA ORDEN DE TRABAJO (CAMPOS READONLY) -->
+                            <div class="col-md-12 text-center mt-3 font-weight-bold">
+                                <h3>Optica Cruz - Registro de Abonos</h3>
+                            </div>
+
+                        </div>
+
+
+                        <div class="row">
+
+
+                            <div class="col-md-3 ml-5 mt-5">
+                                <label for="idOrdenTrabajo">ID Orden Trabajo</label>
+                                <input type="text" name="idOrdenTrabajo"
+                                    value="{{ form.idOrdenTrabajo.value|default:'' }}" readonly class="form-control">
+                            </div>
+
+
+                            <div class="col-md-3 ml-1 mt-5">
+                                <label for="numeroAbono">Número de Abono</label>
+                                <input type="text" name="numeroAbono" id="numeroAbono"
+                                    value="{{ form.numeroAbono.value|default:'' }}" readonly class="form-control">
+                            </div>
+
+
+                            <div class="col-md-4 ml-1 mt-5  ">
+                                <label for="numeroOrdenTrabajo">Numero de Orden de Trabajo</label>
+                                <input value="{{ numeroOrdenTrabajo }}" readonly class="form-control">
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 90%; border: 1px solid #5eb9a4;">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 ml-4">
+                                <label for="rutCliente">RUN Cliente</label>
+                                <input type="text" name="rutCliente" value="{{ form.rutCliente.value }}" readonly
+                                    class="form-control">
+                            </div>
+
+                            <div style="max-width:50px;">
+                                <label for="dvRutCliente">Dígito</label>
+                                <input value="{{ orden_trabajo.idReceta.dvRutCliente|default:'' }}" readonly
+                                    class="form-control">
+                            </div>
+                            <div class="col-md-7 ml-2">
+                                <label for="nombreCliente">Nombre</label>
+                                <input
+                                    value="{{ orden_trabajo.idReceta.nombreCliente  }} {{ orden_trabajo.idReceta.apPaternoCliente }} {{ orden_trabajo.idReceta.apMaternoCliente |default:'' }} "
+                                    readonly class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 90%; border: 1px solid #5eb9a4;">
+                            </div>
+                        </div>
+
+                        <div class="row mt-4 ml-5">
+                            <div class="col-md-4">
+                                <label for="totalLejos">Sub-Total lente de lejos</label>
+                            </div>
+                            <div class="col-md-3">
+                                <input value="{{ totalLejos |default:''}}" readonly class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row mt-1 ml-5">
+                            <div class="col-md-4">
+                                <label for="totalCerca">Sub-Total lente de Cerca</label>
+                            </div>
+                            <div class="col-md-3">
+                                <input value="{{ totalCerca |default:''}}" readonly class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row mt-1 ml-5">
+                            <div class="col-md-4">
+                                <label for="totalOrdenTrabajo">Total Orden de Trabajo</label>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" id="totalOrdenTrabajo" name="totalOrdenTrabajo"
+                                    class="form-control" value="{{ totalOrdenTrabajo }}" readonly>
+                            </div>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="row">
+                            <!-- VARIACION DE VISTA PARA CUANDO SE ENCUENTRA LA ORDEN DE TRABAJO (CAMPOS READONLY) -->
+                            <div class="col-md-12 text-center mt-3 font-weight-bold">
+                                <h3>Optica Cruz - Editar Abonos</h3><br>
+                            </div>
+
+                        </div>
+
+                        <div class="row mt-1 ml-5">
+                            <div class="col-md-4">
+                                <label for="totalOrdenTrabajo">Total Orden de Trabajo</label>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" id="totalOrdenTrabajo" name="totalOrdenTrabajo"
+                                    class="form-control" value="{{ abono.idOrdenTrabajo.totalOrdenTrabajo }}" readonly>
+                            </div>
+
+                        </div>
+
+                        {% endif %}
+
+                        <div class="row mt-3">
+                            <div class="col-md-5"></div>
+                            {{ form.valorAbono|as_crispy_field }}
+
+                        </div>
+
+
+                        <div class="row mt-1 ml-5">
+                            <div class="col-md-4">
+                                <label for="saldo">Saldo Pendiente</label>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" id="saldo" name="saldo" value="{{ form.saldo.value}}"
+                                    class="form-control" readonly>
+                            </div>
+
+                        </div>
+
+                        <script>
+                            // Selecciona los campos de los valores
+
+                            const inputTotal = document.getElementById("totalOrdenTrabajo");
+                            const inputAbono = document.getElementById("id_valorAbono");
+                            const inputSaldo = document.getElementById("saldo");
+                            // Función para actualizar el valor total en tiempo real
+                            function actualizarSaldo() {
+                                const valorTotal = parseFloat(inputTotal.value) || 0;
+                                const valorAbono = parseFloat(inputAbono.value) || 0;
+                                inputSaldo.value = valorTotal - valorAbono;
+
+                            }
+
+                            // Eventos para recalcular el valor total al cambiar los valores
+                            inputAbono.addEventListener("input", actualizarSaldo);
+
+                        </script>
+
+                        <div class="row mt-1 ml-5">
+                            <div class="col-md-4 ">
+                                <label for="tipoPagoAbono">Forma de pago del Abono</label>
+                            </div>
+
+
+                            <br>
+                            <select class="form-select form-control col-md-2 ml-3" id="tipoPagoAbono"
+                                name="tipoPagoAbono" style="width: 150px; height: 35px;">
+
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="Debito">Débito</option>
+                                <option value="Credito">Crédito</option>
+                                <option value="Cheque">Cheque</option>
+                            </select>
+
+                            <script>
+                                const inputValorAbono = document.getElementById("id_valorAbono");
+                                const selectTipoPagoAbono = document.getElementById("tipoPagoAbono");
+
+                                inputValorAbono.addEventListener("input", () => {
+                                    if (inputValorAbono.value !== "") {
+                                        selectTipoPagoAbono.disabled = false;
+                                    } else {
+                                        selectTipoPagoAbono.disabled = true;
+                                    }
+                                });
+                            </script>
+                        </div>
+
+                        <div class="row mt-1 ml-5">
+                            <div class="col-md-4">
+                                <label for="numeroVoucherAbono">Número de Voucher Abono</label>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="numeroVoucherAbono" class="form-control"
+                                    value="{{ form.numeroVoucherAbono.value |default:'' }}" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <hr style="width: 90%; border: 1px solid #5eb9a4;">
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <a href="{% url 'abono_list' %}" class="btn btn-secondary mr-3">Cancelar</a>
+
+                            <button type="submit" class="btn btn-success">Guardar Abono</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

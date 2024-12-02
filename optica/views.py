@@ -6,20 +6,34 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetConfirmView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.views import generic
-from django.views.generic import ListView
+from django.views import generic, View
+from django.views.generic import ListView, TemplateView
+from django.views.generic.edit import CreateView
 from django.db.models import Q, Max, QuerySet
-from typing import Any
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-from .forms import (CustomUserCreationForm, CustomUserChangeForm, 
-    CustomPasswordChangeForm, RecetaForm, OrdenTrabajoForm, UserProfileForm
-)#AdministradorChangeForm, AdministradorCreationForm, AtendedorChangeForm, AtendedorCreationForm, 
-from .models import Cliente, Receta, OrdenTrabajo, CustomUser # Administrador, Atendedor, Tecnico, 
+from django.utils import timezone
+from django.http import JsonResponse, FileResponse, HttpResponse
+from django.core.mail import EmailMessage
+from django.template import Context
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from typing import Any
+import os
 from datetime import datetime
-from optica import models
-from django.http import JsonResponse
+
+# Importaciones de rest_framework
+from rest_framework import viewsets
+
+# Importaciones locales
+from .forms import (
+    CustomUserCreationForm, CustomUserChangeForm, 
+    CustomPasswordChangeForm, RecetaForm, OrdenTrabajoForm, 
+    UserProfileForm, AbonoForm, CertificadoForm
+)
+from .models import Cliente, Receta, OrdenTrabajo, CustomUser, Abono, Certificado
 from .signals import send_password_reset_success_email, send_user_creation_email
+from optica import models
 
 
 User = get_user_model()
@@ -100,23 +114,179 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
         send_password_reset_success_email(user)
         return super().form_valid(form)
 
-# Clientes
-class ListarClienteView(LoginRequiredMixin, generic.ListView):
-    model = Cliente
-    paginate_by = 8
-    ordering = ['-creacionCliente']  # Ordena por el campo 'creacionCliente' en orden descendente
-    #Agregados por Derek para limitar vistas por tipo de suario
-    #template_name = 'optica/cliente_list.html'
-    #context_object_name = 'clientes'
-    # def get_queryset(self) -> QuerySet[Any]:
-    #     q = self.request.GET.get('q')
 
-    #     if q:
-    #         return Cliente.objects.filter(
-    #             Q(nombreCliente__icontains=q) | Q(apPaternoCliente__icontains=q)| Q(rutCliente__icontains=q))
-        
-    #     return super().get_queryset()
+
+# Usuarios
+class UsuarioListView(LoginRequiredMixin, UserPassesTestMixin, generic.ListView):
+    model = CustomUser
+    template_name = 'optica/usuario_list.html'
+    context_object_name = 'usuarios'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('id')  # Ordenar por 'id' o cualquier otro campo relevante
+        query = self.request.GET.get('q')
+        if query:
+            user_type_map = {
+                'Administrador': 1,
+                'Atendedor': 2,
+                'Técnico': 3
+            }
+            user_type_value = user_type_map.get(query, None)
+            if user_type_value is not None:
+                queryset = queryset.filter(user_type=user_type_value)
+            else:
+                queryset = queryset.filter(
+                    Q(username__icontains=query) |
+                    Q(email__icontains=query) |
+                    Q(first_name__icontains=query) |
+                    Q(ap_paterno__icontains=query) |
+                    Q(ap_materno__icontains=query) |
+                    Q(rut__icontains=query)
+                )
+        return queryset
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.user_type in [1, 2, 3]  # Administrador y Atendedor
+
+
+class UsuarioCreateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, generic.CreateView):
+    model = CustomUser
+    form_class = CustomUserCreationForm
+    template_name = 'optica/usuario_form.html'
+    success_url = reverse_lazy('usuario_list')
+    success_message = "Usuario {username} creado con éxito."
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Crear Usuario'
+        context['is_edit'] = False
+        return context
+
+    def form_valid(self, form):
+        form.instance.username = form.cleaned_data['username']
+        self.object = form.save()
+        password = form.cleaned_data.get('password1')
+        send_user_creation_email(self.object, password)
+        # Limpiar los mensajes de error antes de agregar el mensaje de éxito
+        storage = messages.get_messages(self.request)
+        list(storage)  # Consume todos los mensajes para limpiarlos
+        return super().form_valid(form)
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message.format(username=self.object.username)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Por favor, corrija los errores en el formulario.')
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.user_type == 1  # Solo Administrador
     
+
+class UsuarioUpdateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, generic.UpdateView):
+    model = CustomUser
+    form_class = CustomUserChangeForm
+    template_name = 'optica/usuario_form.html'
+    success_url = reverse_lazy('usuario_list')
+    success_message = "Usuario {username} actualizado con éxito."
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message.format(username=self.object.username)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Editar Usuario'
+        context['is_edit'] = True
+        return context
+    
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Por favor, corrija los errores en el formulario.')
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.user_type == 1  # Solo Administrador
+
+class UsuarioDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteView):
+    model = CustomUser
+    template_name = 'optica/usuario_confirm_delete.html'
+    success_url = reverse_lazy('usuario_list')
+    success_message = "Usuario borrado con éxito."
+
+    #Nuevo
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super().delete(request, *args, **kwargs)
+
+    
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.user_type == 1  # Solo Administrador
+    
+def editar_orden_trabajo(request, pk):
+    orden_trabajo = get_object_or_404(OrdenTrabajo, pk=pk)
+    if request.method == "POST":
+        form = OrdenTrabajoForm(request.POST, instance=orden_trabajo)
+        if form.is_valid():
+            form.save()
+            return redirect('orden_trabajo_list')
+    else:
+        form = OrdenTrabajoForm(instance=orden_trabajo)
+    return render(request, 'ordenTrabajo_form.html', {'form': form, 'orden_trabajo': orden_trabajo})
+
+def generar_certificado(request):
+    orden_trabajo = None
+    id_orden_trabajo = request.GET.get('id_orden_trabajo')
+
+    if id_orden_trabajo:
+        try:
+            orden_trabajo = OrdenTrabajo.objects.get(idOrdenTrabajo=id_orden_trabajo)
+            messages.success(request, "Orden de Trabajo encontrada")
+        except OrdenTrabajo.DoesNotExist:
+            messages.error(request, "Orden de Trabajo no encontrada")
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="certificado_{}.pdf"'.format(
+        orden_trabajo.idOrdenTrabajo if orden_trabajo else '')
+
+    return render(request, 'optica/certificado_form.html', {
+        'orden_trabajo': orden_trabajo,
+    }, response)
+
+
+def enviar_certificado_pdf(request):
+    if request.method == 'POST':
+        form = CertificadoForm(request.POST, request.FILES)
+        if form.is_valid():
+            certificado = form.cleaned_data['certificado']
+            email_cliente = form.cleaned_data['emailCliente']
+            nombre_cliente = form.cleaned_data['nombreCliente']
+            numero_orden_trabajo = form.cleaned_data['numeroOrdenTrabajo']
+            id_orden_trabajo = form.cleaned_data['idOrdenTrabajo']
+
+            asunto = 'Certificado de Óptica Cruz'
+            cuerpo = f'Sr. {nombre_cliente}, adjunto encontrará su certificado correspondiente a la orden de trabajo N° {numero_orden_trabajo} ID: {id_orden_trabajo}.'
+            email = EmailMessage(asunto, cuerpo, 'rigovas@hotmail.com', [email_cliente])
+            email.attach(certificado.name, certificado.read(), certificado.content_type)
+            email.send()
+            messages.success(request, "El certificado se ha enviado exitosamente.")
+            return redirect('cliente_list')
+        else:
+            messages.error(request, "Error al enviar el certificado. Por favor, verifique los datos ingresados.")
+    else:
+        form = CertificadoForm()
+    return render(request, 'certificado_form.html', {'form': form})
+
+
+
+
+# Create your views here.
+class ListarClienteView(generic.ListView):
+    model = Cliente
+    paginate_by = 10
+    ordering = ['-creacionCliente']  # Ordena por el campo 'creacionCliente' en orden descendente    
     
     
     def get_queryset(self):
@@ -137,9 +307,6 @@ class ListarClienteView(LoginRequiredMixin, generic.ListView):
         context = super().get_context_data(**kwargs)
         context['q'] = self.request.GET.get('q', '')  # Mantener el valor de la búsqueda en el contexto
         return context
-    
-    def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.user_type in [1, 2, 3]  # Administrador, Atendedor y Técnico
 
 class CrearClienteView(SuccessMessageMixin, generic.CreateView):
     model = Cliente
@@ -154,7 +321,6 @@ class CrearClienteView(SuccessMessageMixin, generic.CreateView):
     'direccionCliente',)
     success_url = reverse_lazy('cliente_list')
     success_message = "El cliente se ha creado exitosamente."
-    
 
 
 class EditarClienteView(SuccessMessageMixin, generic.UpdateView):
@@ -174,10 +340,12 @@ class EliminarClienteView(SuccessMessageMixin, generic.DeleteView):
     success_url = reverse_lazy('cliente_list')
     success_message = "El cliente se ha eliminado exitosamente."
 
-# Recetas
+
+#RECETAS
+
 class ListarRecetaView(generic.ListView):
     model = Receta
-    paginate_by = 8
+    paginate_by = 10
     ordering = ['-creacionReceta']
     
     
@@ -307,10 +475,13 @@ class EliminarRecetaView(SuccessMessageMixin, generic.DeleteView):
     success_url = reverse_lazy('receta_list')
     success_message = "La receta se ha eliminado exitosamente."
 
-# Órdenes de Trabajo
+
+
+#ORDEN DE TRABAJO
+
 class ListarOrdenTrabajoView(generic.ListView):
     model = OrdenTrabajo
-    paginate_by = 8
+    paginate_by = 10
     ordering = ['-fechaOrdenTrabajo']
     
     def get_queryset(self) -> QuerySet[Any]:
@@ -324,16 +495,6 @@ class ListarOrdenTrabajoView(generic.ListView):
         return super().get_queryset()
  
     
-    # def get_queryset(self) -> QuerySet[Any]: 
-    #     q = self.request.GET.get('q')
-    #     if q:
-    #         return OrdenTrabajo.objects.filter(
-    #             Q(idReceta__rutCliente__cliente__nombreCliente__icontains=q) | 
-    #             Q(idReceta__rutCliente__cliente__apPaternoCliente__icontains=q) | 
-    #             Q(idReceta__rutCliente__rutCliente__icontains=q)
-    #         )
-    #     return super().get_queryset()
-
 class CrearOrdenTrabajoView(SuccessMessageMixin, generic.CreateView):
     model = OrdenTrabajo
     fields = (
@@ -375,8 +536,10 @@ class CrearOrdenTrabajoView(SuccessMessageMixin, generic.CreateView):
     'totalCerca',
     'totalOrdenTrabajo',
     'tipoPago',
+    'estadoDelPago',
     'numeroVoucherOrdenTrabajo',
-    'observacionOrdenTrabajo'
+    'observacionOrdenTrabajo',
+    'estadoOrdenTrabajo',
     )
     
     success_url = reverse_lazy('ordenTrabajo_list')
@@ -402,20 +565,6 @@ class CrearOrdenTrabajoView(SuccessMessageMixin, generic.CreateView):
 
         numero_orden = self.generar_numero_orden()
 
-
-
-        # # Inicializa el formulario con el número de orden y la receta si está presente
-        # form = OrdenTrabajoForm(initial={
-        #     'numeroOrdenTrabajo': numero_orden,
-        #     'idReceta': receta.idReceta if receta else None
-        # })
-
-        # return render(request, self.template_name, {
-        #     'form': form,
-        #     'receta': receta
-        # })
-    
-    
     
     
         form = OrdenTrabajoForm(initial={  
@@ -456,8 +605,6 @@ class CrearOrdenTrabajoView(SuccessMessageMixin, generic.CreateView):
     
         return render(request, self.template_name, {'form': form, 'receta': receta})
     
-    
-
     def post(self, request):
         form = OrdenTrabajoForm(request.POST)
         receta = None 
@@ -471,10 +618,24 @@ class CrearOrdenTrabajoView(SuccessMessageMixin, generic.CreateView):
                 if form.is_valid():
                     orden_trabajo = form.save(commit=False)
                     orden_trabajo.idReceta = receta  # Asigna la receta a la orden de trabajo
-                    orden_trabajo.save()  # Guarda la orden de trabajo
                     
-                    messages.success(request, "Orden de Trabajo creada con éxito.")
-                    return redirect(self.success_url)  # Redirige tras guardar
+                    # Manejo de los campos booleanos
+                    tipo_pago = request.POST.get('tipoDePago')
+                    if tipo_pago == 'esAbono':
+                        orden_trabajo.esAbono = True
+                        orden_trabajo.esPagoTotal = False
+                    elif tipo_pago == 'esPagoTotal':
+                        orden_trabajo.esAbono = False
+                        orden_trabajo.esPagoTotal = True
+
+                # Manejo del campo estadoDelPago
+                estado_del_pago = form.cleaned_data['estadoDelPago']
+                orden_trabajo.estadoDelPago = estado_del_pago
+                    
+                orden_trabajo.save()  # Guarda la orden de trabajo
+                    
+                messages.success(request, "La Orden de Trabajo se ha creado exitosamente.")
+                return redirect(self.success_url)  # Redirige tras guardar
                     
             except Receta.DoesNotExist:
                 messages.error(request, "Receta no encontrada.")
@@ -484,7 +645,7 @@ class CrearOrdenTrabajoView(SuccessMessageMixin, generic.CreateView):
         # Si no es válido, muestra el formulario de nuevo con los mensajes de error
         return render(request, self.template_name, {'form': form, 'receta': receta})
 
-
+ 
 class EditarOrdenTrabajoView(SuccessMessageMixin, generic.UpdateView):
     model = OrdenTrabajo
     fields = (
@@ -515,9 +676,14 @@ class EditarOrdenTrabajoView(SuccessMessageMixin, generic.UpdateView):
     'marcoCerca',
     'valorMarcoCerca',
     'valorCristalesCerca', 
+    'estadoDelPago',
     'tipoPago',
     'numeroVoucherOrdenTrabajo',
-    'observacionOrdenTrabajo'
+    'observacionOrdenTrabajo',
+    'estadoOrdenTrabajo',
+    'totalLejos',
+    'totalCerca',
+    'totalOrdenTrabajo',
     )
     success_url = reverse_lazy('ordenTrabajo_list')
     success_message = "La Orden de Trabajo se ha editado exitosamente."
@@ -526,6 +692,18 @@ def get_initial(self):
         initial = super().get_initial()
         initial['numeroOrdenTrabajo'] = self.object.numeroOrdenTrabajo  # Valor del modelo
         return initial
+
+
+def editar_orden_trabajo(request, pk):
+    orden_trabajo = get_object_or_404(OrdenTrabajo, pk=pk)
+    if request.method == "POST":
+        form = OrdenTrabajoForm(request.POST, instance=orden_trabajo)
+        if form.is_valid():
+            form.save()
+            return redirect('orden_trabajo_list')
+    else:
+        form = OrdenTrabajoForm(instance=orden_trabajo)
+    return render(request, 'ordenTrabajo_form.html', {'form': form, 'orden_trabajo': orden_trabajo})
 
 def form_valid(self, form):
         # Aquí puedes agregar lógica si necesitas procesar el formulario
@@ -536,111 +714,232 @@ class EliminarOrdenTrabajoView(SuccessMessageMixin, generic.DeleteView):
     success_url = reverse_lazy('ordenTrabajo_list')
     success_message = "La Orden de Trabajo se ha eliminado exitosamente."
 
-# Usuarios
-class UsuarioListView(LoginRequiredMixin, UserPassesTestMixin, generic.ListView):
-    model = CustomUser
-    template_name = 'optica/usuario_list.html'
-    context_object_name = 'usuarios'
+
+# ABONOS
+class ListarAbonoView(generic.ListView):
+    model = Abono
     paginate_by = 10
+    ordering = ['-fechaAbono']
+    
+    def get_queryset(self) -> QuerySet[Any]:
+        q = self.request.GET.get('q')
+        if q:
+            return Abono.objects.filter(
+                Q(idOrdenTrabajo__idReceta__rutCliente__nombreCliente__icontains=q) | 
+                Q(idOrdenTrabajo__idReceta__rutCliente__apPaternoCliente__icontains=q) | 
+                Q(idOrdenTrabajo__idReceta__rutCliente__rutCliente__icontains=q)
+            )
+        return super().get_queryset()
+    
+    
+class CrearAbonoView(SuccessMessageMixin, generic.CreateView):
+    model = Abono
+    fields = (
+        'idAbono',
+        'idOrdenTrabajo',
+        'rutCliente', 
+        'dvRutCliente', 
+        'valorAbono',
+        'saldo',
+        'saldoAnterior',
+        'tipoPagoAbono',
+        'numeroVoucherAbono',
+        'numeroAbono',
+    )
+    form_class = AbonoForm
+    success_url = reverse_lazy('abono_list')
+    success_message = "El abono se ha Registrado exitosamente."
+    template_name = 'optica/abono_form.html'
 
-    def get_queryset(self):
-        queryset = super().get_queryset().order_by('id')  # Ordenar por 'id' o cualquier otro campo relevante
-        query = self.request.GET.get('q')
-        if query:
-            user_type_map = {
-                'Administrador': 1,
-                'Atendedor': 2,
-                'Técnico': 3
-            }
-            user_type_value = user_type_map.get(query, None)
-            if user_type_value is not None:
-                queryset = queryset.filter(user_type=user_type_value)
-            else:
-                queryset = queryset.filter(
-                    Q(username__icontains=query) |
-                    Q(email__icontains=query) |
-                    Q(first_name__icontains=query) |
-                    Q(ap_paterno__icontains=query) |
-                    Q(ap_materno__icontains=query) |
-                    Q(rut__icontains=query)
-                )
-        return queryset
+    def generar_numero_abono(self, numeroOrdenTrabajo):
+        # Lógica para calcular el siguiente número de orden
+        ultimo_valor = Abono.objects.filter(idOrdenTrabajo=numeroOrdenTrabajo).aggregate(max_val=Max('numeroAbono'))['max_val']
+        return (ultimo_valor + 1) if ultimo_valor else 1
+    
+    def get(self, request):
+        orden_trabajo = None
+        cliente = None
+        id_orden_trabajo = request.GET.get('id_orden_trabajo')
+        # rut_cliente = request.GET.get('rut_cliente') #va a ser usado cuando se haga la relacion entre cliente y orden de trabajo
 
-    def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.user_type in [1, 2, 3]  # Administrador y Atendedor
+        if id_orden_trabajo:
+            try:
+                orden_trabajo = OrdenTrabajo.objects.get(idOrdenTrabajo=id_orden_trabajo)
+                
+                cliente = orden_trabajo.idReceta.rutCliente #se esta tomando el cliente de la receta, se debe cambiar por el cliente de la orden de trabajo
+                # cliente = Cliente.objects.get(rutCliente=rut_cliente) #funcionara cuando se haga la relacion entre cliente y orden de trabajo
+                messages.success(request, "Orden de Trabajo encontrada")
+            except OrdenTrabajo.DoesNotExist:
+                messages.error(request, "Orden de Trabajo no encontrada")
 
-#Usuarios
-class UsuarioCreateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, generic.CreateView):
-    model = CustomUser
-    form_class = CustomUserCreationForm
-    template_name = 'optica/usuario_form.html'
-    success_url = reverse_lazy('usuario_list')
-    success_message = "Usuario {username} creado con éxito."
+        numero_abono = self.generar_numero_abono(orden_trabajo) if orden_trabajo else 1
+        
+         # Obtener el último saldo guardado para el idOrdenTrabajo
+        ultimo_abono = Abono.objects.filter(idOrdenTrabajo=orden_trabajo).order_by('-numeroAbono').first()
+        # saldo_anterior = ultimo_abono.saldo if ultimo_abono else orden_trabajo.totalOrdenTrabajo
+        
+        
+        
+           # Cargar formulario de ABONO con datos del Cliente y Orden de Trabajo, si existen, se pueden prellenar campos
+        form = AbonoForm(initial={
+            'numeroAbono': numero_abono,
+            'idOrdenTrabajo': orden_trabajo.idOrdenTrabajo if orden_trabajo else '',
+            # 'rutCliente' : orden_trabajo.idReceta.rutCliente if orden_trabajo else '', #se esta tomando el cliente de la receta, se debe cambiar por el cliente de la orden de trabajo
+            'rutCliente': cliente.rutCliente if cliente else '',
+            'dvRutCliente': cliente.dvRutCliente if cliente else '',
+            'totalOrdenTrabajo': orden_trabajo.totalOrdenTrabajo if orden_trabajo else '',
+            'valorAbono': '',
+            'saldoAnterior': '',
+            'saldo': '',
+            'tipoPagoAbono': '',
+            'numeroVoucherAbono': ''
+        })
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Crear Usuario'
-        context['is_edit'] = False
-        return context
+        return render(request, self.template_name, {
+            'form': form,
+            'orden_trabajo': orden_trabajo,
+            'cliente': cliente,
+            'dvRutCliente': cliente.dvRutCliente if cliente else '',
+            'numeroAbono': numero_abono,
+            'idOrdenTrabajo': orden_trabajo.idOrdenTrabajo if orden_trabajo else '',
+            'numeroOrdenTrabajo': orden_trabajo.numeroOrdenTrabajo if orden_trabajo else '',
+            'estadoDelPago': orden_trabajo.estadoDelPago if orden_trabajo else '',
+            'totalLejos': orden_trabajo.totalLejos if orden_trabajo else '',
+            'totalCerca': orden_trabajo.totalCerca if orden_trabajo else '',
+            'saldoAnterior': orden_trabajo.totalOrdenTrabajo if orden_trabajo else '',
+            'saldo': orden_trabajo.totalOrdenTrabajo if orden_trabajo else '',
+            'totalOrdenTrabajo': orden_trabajo.totalOrdenTrabajo if orden_trabajo else ''
+        })
+        
+        
+        # return render(request, self.template_name, {'form': form, 'orden_trabajo': orden_trabajo, 'cliente': cliente})
 
-    def form_valid(self, form):
-        form.instance.username = form.cleaned_data['username']
-        self.object = form.save()
-        password = form.cleaned_data.get('password1')
-        send_user_creation_email(self.object, password)
-        # Limpiar los mensajes de error antes de agregar el mensaje de éxito
-        storage = messages.get_messages(self.request)
-        list(storage)  # Consume todos los mensajes para limpiarlos
-        return super().form_valid(form)
+    # def post(self, request):
+    #     form = AbonoForm(request.POST)
+    #     if form.is_valid():
+    #         abono=form.save()
+    #         messages.success(request, self.success_message)
+    #         return redirect(self.success_url)
+    #     return render(request, self.template_name, {'form': form})
+    
+   
+    
+    def post(self, request):
+        form = AbonoForm(request.POST)
+        # cliente = None 
+        orden_trabajo = None
+        # rut_cliente = request.POST.get('rutCliente')  # Captura el `rut_cliente` del formulario
+        id_orden_trabajo = request.POST.get('idOrdenTrabajo')  # Captura el `id_orden_trabajo` del formulario
+        
+        if id_orden_trabajo:
+            try:
+                # cliente = Cliente.objects.get(rutCliente=rut_cliente)
+                orden_trabajo = OrdenTrabajo.objects.get(idOrdenTrabajo=id_orden_trabajo)
+             
+                if form.is_valid():
+                    abono = form.save(commit=False)
+                    # abono.rutCliente = cliente  # Asigna el cliente al abono
+                    abono.idOrdenTrabajo = orden_trabajo  # Asigna la orden de trabajo al abono
+                    abono.save()  # Guarda el abono
+                    messages.success(request, "El abono se ha registrado exitosamente.")
+                    return redirect(self.success_url)
+            except OrdenTrabajo.DoesNotExist:
+                messages.error(request, "Orden de trabajo no encontrada.")
+        
+        else:
+            messages.error(request, "No se proporcionó un ID de orden de trabajo válido.")
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'orden_trabajo': orden_trabajo,
+            'dvRutCliente': orden_trabajo.idReceta.dvRutCliente if orden_trabajo else '',
+            'nombreCliente': orden_trabajo.idReceta.nombreCliente if orden_trabajo else '',
+            'apPaternoCliente': orden_trabajo.idReceta.apPaternoCliente if orden_trabajo else '',
+            'apMaternoCliente': orden_trabajo.idReceta.apMaternoCliente if orden_trabajo else '',
+            'numeroOrdenTrabajo': orden_trabajo.numeroOrdenTrabajo if orden_trabajo else '',
+            'estadoDelPago': orden_trabajo.estadoDelPago if orden_trabajo else '',
+            'totalLejos': orden_trabajo.totalLejos if orden_trabajo else '',
+            'totalCerca': orden_trabajo.totalCerca if orden_trabajo else '',
+            # 'saldoAnterior': orden_trabajo.totalOrdenTrabajo if orden_trabajo else '',
+            # 'saldo': orden_trabajo.totalOrdenTrabajo if orden_trabajo else '',
+            'totalOrdenTrabajo': orden_trabajo.totalOrdenTrabajo if orden_trabajo else ''
+        })    
 
-    def get_success_message(self, cleaned_data):
-        return self.success_message.format(username=self.object.username)
+class EditarAbonoView(SuccessMessageMixin, generic.UpdateView):
+    model = Abono
+    fields = ( 'valorAbono', 
+    'tipoPagoAbono', 
+    'saldoAnterior',
+    'saldo',
+    'numeroVoucherAbono',)
+    success_url = reverse_lazy('abono_list')
+    success_message = "El abono se ha editado exitosamente."
+    
+def get_initial(self):
+        initial = super().get_initial()
+        initial['numeroAbono'] = self.object.numeroOrdenTrabajo.numeroAbono  # Valor del modelo
+        return initial
+    
+    
+def editar_abono(request, pk):
+    abono = get_object_or_404(Abono, pk=pk)
+    if request.method == "POST":
+        form = AbonoForm(request.POST, instance=abono)
+        if form.is_valid():
+            form.save()
+            return redirect('abono_list')
+    else:
+        form = AbonoForm(instance=abono)
+    return render(request, 'abono_form.html', {'form': form, 'abono': abono})
 
-    def form_invalid(self, form):
-        messages.error(self.request, 'Por favor, corrija los errores en el formulario.')
-        return self.render_to_response(self.get_context_data(form=form))
+def form_valid(self, form):
+        # Aquí puedes agregar lógica si necesitas procesar el formulario
+        return super().form_valid(form) 
 
-    def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.user_type == 1  # Solo Administrador
+
+class EliminarAbonoView(SuccessMessageMixin, generic.DeleteView):
+    model = Abono
+    success_url = reverse_lazy('abono_list')
+    success_message = "El abono se ha eliminado exitosamente."
+
+
+
+#CERTIFICADOS
     
 
-class UsuarioUpdateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, generic.UpdateView):
-    model = CustomUser
-    form_class = CustomUserChangeForm
-    template_name = 'optica/usuario_form.html'
-    success_url = reverse_lazy('usuario_list')
-    success_message = "Usuario {username} actualizado con éxito."
+class CrearCertificadoView(CreateView):
+    template_name = 'optica/certificado_form.html'
 
-    def get_success_message(self, cleaned_data):
-        return self.success_message.format(username=self.object.username)
+    def get(self, request, *args, **kwargs):
+        orden_trabajo = None
+        id_orden_trabajo = request.GET.get('id_orden_trabajo')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Editar Usuario'
-        context['is_edit'] = True
-        return context
-    
-    def form_valid(self, form):
-        return super().form_valid(form)
+        if id_orden_trabajo:
+            try:
+                orden_trabajo = OrdenTrabajo.objects.get(idOrdenTrabajo=id_orden_trabajo)
+                messages.success(request, "Orden de Trabajo encontrada")
+            except OrdenTrabajo.DoesNotExist:
+                messages.error(request, "Orden de Trabajo no encontrada")
 
-    def form_invalid(self, form):
-        messages.error(self.request, 'Por favor, corrija los errores en el formulario.')
-        return self.render_to_response(self.get_context_data(form=form))
+        return render(request, self.template_name, {
+            'orden_trabajo': orden_trabajo,
+            'numero_orden_trabajo': orden_trabajo.numeroOrdenTrabajo if orden_trabajo else '',
+            'idOrdenTrabajo': orden_trabajo.idOrdenTrabajo if orden_trabajo else '',
+        })
+        
+        
 
-    def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.user_type == 1  # Solo Administrador
 
-class UsuarioDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteView):
-    model = CustomUser
-    template_name = 'optica/usuario_confirm_delete.html'
-    success_url = reverse_lazy('usuario_list')
-    success_message = "Usuario borrado con éxito."
-
-    #Nuevo
-    def delete(self, request, *args, **kwargs):
-        messages.success(self.request, self.success_message)
-        return super().delete(request, *args, **kwargs)
-
-    
-    def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.user_type == 1  # Solo Administrador
+class CertificadoPdfView(View):
+    def get(self, request, *args, **kwargs):
+        template = get_template('optica/certificado_pdf.html')  
+        context = {'title': 'Certificado de Óptica Cruz'}
+        html = template.render(context)
+         # return HttpResponse ('<h1> Certificado </h1>')
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="certificado.pdf"'
+        pisaStatus = pisa.CreatePDF(
+            html, dest=response)
+        if pisaStatus.err:
+            return HttpResponse('We had some errors <pre>' + html + '</pre>')
+        return response
